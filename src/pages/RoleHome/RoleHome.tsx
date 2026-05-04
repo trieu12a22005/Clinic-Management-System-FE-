@@ -72,16 +72,23 @@ const RoleHome = () => {
             path: '/medical-records'
         },
         {
-            id: 3,
-            title: 'Kê đơn thuốc & Dược phẩm - PHA.03',
-            description: 'Tạo đơn thuốc mới, kiểm tra tương tác thuốc và tra cứu tồn kho.',
-            path: '/prescriptions'
+            id: 4,
+            title: 'Quản lý hàng đợi phát thuốc - PHA.01',
+            description: 'Theo dõi hàng đợi, xem đơn thuốc và xác nhận phát thuốc cho bệnh nhân.',
+            path: '/pharmacy-queue'
         },
         {
-            id: 4,
+            id: 5,
+            title: 'Quản lý Kho thuốc - PHA.02',
+            description: 'Tra cứu tồn kho, kiểm tra hạn sử dụng và cảnh báo thuốc sắp hết.',
+            access: 'Dược sĩ, Quản lý',
+            path: '/pharmacy-inventory'
+        },
+        {
+            id: 6,
             title: 'Phiếu khám bệnh',
             description: 'ghi kết quả khám bệnh, chẩn đoán và kế hoạch điều trị cho bệnh nhân',
-            path: '/examination'
+            path: '/waiting-room'
         }
     ];
 
@@ -167,6 +174,12 @@ const RoleHome = () => {
                                         <strong className="font-semibold text-gray-900">Mô tả: </strong> 
                                         <span className="text-gray-600">{feature.description}</span>
                                     </p>
+                                    {feature.access && (
+                                        <p>
+                                            <strong className="font-semibold text-gray-900">Quyền truy cập: </strong>
+                                            <span className="text-gray-600">{feature.access}</span>
+                                        </p>
+                                    )}
                                 </div>
                             </div>
                         ))}

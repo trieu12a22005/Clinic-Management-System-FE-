@@ -1,10 +1,10 @@
-import type { ExaminationRow } from '@/types/examinationType';
+import type { EnterTicketRow } from '@/types/EnterTicket';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 type Props = {
-    data: ExaminationRow[];
+    data: EnterTicketRow[];
 };
-export default function WaitingRoom({ data = [] }: Props) {
+export default function ListWaitingRoom({ data = [] }: Props) {
     console.log("props: ", data);
     const [selectedPatientId, setSelectedPatientId] = useState<string>("");
     useEffect(() => {
@@ -15,7 +15,7 @@ export default function WaitingRoom({ data = [] }: Props) {
     const selectedPatient = data.find((p) => p.patientID === selectedPatientId);
     const navigate = useNavigate()
     const handleclick = () => {
-        navigate(`/prescription`);
+        navigate(`/prescription/${selectedPatient?.ticketID}`);
     }
     return (
         <div className="min-h-screen bg-gray-100 p-6 font-sans">
@@ -110,7 +110,7 @@ export default function WaitingRoom({ data = [] }: Props) {
 
                                         <div className="bg-blue-50 p-4 rounded-lg border border-blue-100">
                                             <h3 className="text-sm font-bold text-[#1867c0] uppercase mb-2">Tiền sử bệnh án</h3>
-                                            <p className="text-gray-800">{"Mo"}</p>
+                                            <p className="text-gray-800">{selectedPatient.previousRecord}</p>
                                         </div>
                                     </div>
                                 </div>

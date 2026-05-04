@@ -9,6 +9,14 @@ class AuthApi {
         const response = await apiClient.get('/auth/logout');
         return response.data;
     }
+    async getProfile() {
+        const response = await apiClient.get('auth/profile');
+        return response.data;
+    }
+    async updateProfile(data: { firstName: string; lastName: string; password?: string }) {
+        const response = await apiClient.put('/auth/update-profile', data);
+        return response.data;
+    }
 }
 
 const authApi = new AuthApi();

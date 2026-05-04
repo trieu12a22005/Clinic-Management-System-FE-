@@ -14,7 +14,7 @@ const loginSchema = z.object({
   password: z
     .string()
     .min(8, 'Mật khẩu phải có ít nhất 8 ký tự')
-    .regex(/[A-Z]/, 'Mật khẩu phải chứa ít nhất 1 ký tự hoa')
+    // .regex(/[A-Z]/, 'Mật khẩu phải chứa ít nhất 1 ký tự hoa')
     .regex(/[a-z]/, 'Mật khẩu phải chứa ít nhất 1 ký tự thường')
     
 });

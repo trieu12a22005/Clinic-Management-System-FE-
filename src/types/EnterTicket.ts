@@ -1,20 +1,10 @@
-export interface GetExaminationsParams {
+export interface EnterTicketParams {
   status?: string;
   roomID?: string;
   page?: number;
   limit?: number;
 }
-export interface GetExaminationsResponse {
-  data: ExaminationTicket[];
-  pagination: {
-    totalItems: number;
-    totalPages: number;
-    currentPage: number;
-    itemCount: number;
-  };
-}
-
-export interface ExaminationTicket {
+export interface EnterTicket {
   ticketID: string;
   orderNum: number;
   appointmentID: string;
@@ -26,6 +16,7 @@ export interface ExaminationTicket {
   length?: number;
   patient: {
     patientID: string;
+    previousRecord: string;
     account: {
       fullName: string;
       DisplayID: string;
@@ -39,7 +30,8 @@ export interface ExaminationTicket {
     roomName: string;
   };
 }
-export interface ExaminationRow {
+export interface EnterTicketRow {
+  appointmentID: string;
   ticketID: string;
   orderNum: number;
   fullName: string;
@@ -52,4 +44,5 @@ export interface ExaminationRow {
   DisplayID: string;
   address: string;
   genderDisplay: string;
+  previousRecord: string;
 }

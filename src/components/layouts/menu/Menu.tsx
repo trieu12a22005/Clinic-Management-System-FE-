@@ -21,14 +21,14 @@ const MenuApp: React.FC<MenuAppProps> = () => {
 
   const items: MenuItem[] = [
     {
-      key: "/design",
+      key: "/home",
       icon: <PieChartOutlined />,
-      label: <Link to="/design">Design</Link>,
+      label: <Link to="/home">Home</Link>,
     },
     {
       key: "/development",
       icon: <DesktopOutlined />,
-      label: <Link to="/development">Development</Link>,
+      label: <Link to="/development">av</Link>,
     },
     {
       key: "/components",

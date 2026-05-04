@@ -1,17 +1,34 @@
-import React, { useState } from 'react';
-import {Button, Col, DatePicker, Form, Input, InputNumber, Radio, Row, Select, Space, Table, message,} from 'antd';
-import { UsePrescription } from './usePrescription';
+import React, { useEffect, useState } from 'react';
+import { Button, Col, DatePicker, Form, Input, InputNumber, Radio, Row, Space, Table } from 'antd';
+import { UsePostExamine, UsePrescription, UseTicketID } from './usePrescription';
 import type { Medicine } from '@/types/medicine';
 import { fullLayout, itemLayout } from './components/constant';
 import type { PrescriptionMedicine, TableRow, UsageItem } from '@/types/Prescription';
 import { getMedicineColumns } from './components/medicineColumns';
 import MedicineSection from './components/MedicineSection';
 import { buildPdfData, exportPrescriptionPdf } from './components/pdf';
+import { useNavigate, useParams } from 'react-router-dom';
+import toast from 'react-hot-toast';
+import dayjs from "dayjs";
+import type { PostExamineData } from '@/types/examine';
 const Prescription: React.FC = () => {
   const [keyword, setKeyword] = useState('');
   const [form] = Form.useForm();
+  const { id } = useParams();
+  const { ticket } = UseTicketID(id || '');
+  useEffect(() => {
+    if (ticket) {
+      form.setFieldsValue({
+        name: ticket.fullName,
+        gender: ticket.genderDisplay,
+        address: ticket.address,
+      });
+    }
+  }, [ticket, form]);
+  console.log('ticket data:', ticket);
   const [medicineList, setMedicineList] = useState<PrescriptionMedicine[]>([]);
   const { medicineOptions = [] } = UsePrescription(keyword);
+  const naviagate = useNavigate();
   const medicineSelectOptions = medicineOptions.map((item: Medicine) => ({
     label: item.medicineName,
     value: item.medicineID,
@@ -22,25 +39,25 @@ const Prescription: React.FC = () => {
       const medicineId = form.getFieldValue('medicineId');
       const usages: UsageItem[] = form.getFieldValue('usages') || [];
       if (!medicineId) {
-        message.warning('Vui lòng chọn thuốc');
+        toast.error('Vui lòng chọn thuốc');
         return;
       }
       if (!usages.length) {
-        message.warning('Vui lòng thêm ít nhất 1 cách dùng');
+        toast.error('Vui lòng thêm ít nhất 1 cách dùng');
         return;
       }
       const hasEmptyUsage = usages.some(
         (item) => !item?.timeToTake || !item?.quantity || !item?.usage
       );
       if (hasEmptyUsage) {
-        message.warning('Vui lòng nhập đầy đủ các cách dùng');
+        toast.error('Vui lòng nhập đầy đủ các cách dùng');
         return;
       }
       const selectedMedicine = medicineOptions.find(
         (item: Medicine) => item.medicineID === medicineId
       );
       if (!selectedMedicine) {
-        message.error('Không tìm thấy thuốc đã chọn');
+        toast.error('Không tìm thấy thuốc đã chọn');
         return;
       }
       setMedicineList((prev) => [
@@ -56,9 +73,10 @@ const Prescription: React.FC = () => {
         usages: [{}],
       });
       setKeyword('');
-      message.success('Đã thêm thuốc vào danh sách');
+      toast.success('Đã thêm thuốc vào danh sách');
     } catch (error) {
       console.error(error);
+      toast.error('Có lỗi xảy ra khi thêm thuốc');
     }
   };
   const handleRemoveMedicine = (medicineIndex: number) => {
@@ -89,37 +107,64 @@ const Prescription: React.FC = () => {
   const columns = getMedicineColumns({
     onRemove: handleRemoveMedicine,
   });
-const handleExportPdf = async () => {
-  const values = form.getFieldsValue();
-  const pdfData = buildPdfData({
-    values,
-    medicineList,
-  });
-  await exportPrescriptionPdf(pdfData);
-};
-  const onFinish = (values: Record<string, unknown>) => {
-    if (medicineList.length === 0) {
-      message.warning('Vui lòng thêm ít nhất 1 thuốc vào danh sách');
-      return;
-    }
+  const handleExportPdf = async () => {
+    const values = form.getFieldsValue();
+    const pdfData = buildPdfData({
+      values,
+      medicineList,
+    });
+    await exportPrescriptionPdf(pdfData);
+  };
+  const { mutate } = UsePostExamine();
+
+  const onFinish = (values: PostExamineData) => {
     const payload = {
       ...values,
       medicines: medicineList,
     };
-    console.log('submit payload:', payload);
-    message.success('Lưu phiếu khám thành công');
+    const examineData: PostExamineData = {
+      appointmentID: ticket?.appointmentID || '',
+      patientID: ticket?.patientID || '',
+      symptoms: payload.symptoms,
+      status: "done",
+      treatmentPlan: payload.treatmentPlan,
+      diagnose: payload.diagnose,
+      note: payload.note,
+    };
+    console.log('payload before submit:', examineData);
+
+    mutate(examineData, {
+      onSuccess: (response) => {
+        console.log('Lưu phiếu khám thành công:', response);
+        toast.success('Lưu phiếu khám thành công');
+        naviagate("/waiting-room");
+
+      },
+      onError: (error) => {
+        console.error('Lỗi:', error);
+        toast.error('Lưu phiếu khám thất bại');
+      },
+    });
   };
+  const handleHistory = () => {
+    naviagate(`/patient-history/${ticket?.patientID}`);
+  }
   return (
     <div className="px-8 pb-8 mr-[6%]">
-      <div className="mt-6 text-center text-2xl font-bold uppercase text-gray-700">
-        PHIẾU KHÁM BỆNH
+      <div>
+        <div className="mt-6 text-center text-2xl font-bold uppercase text-gray-700">
+          PHIẾU KHÁM BỆNH
+        </div>
+        <Button type="primary" onClick={handleHistory} >
+          Lịch sử khám bệnh
+        </Button>
       </div>
       <Form
         form={form}
         layout="horizontal"
         style={{ width: '100%', marginTop: '50px' }}
         onFinish={onFinish}
-        initialValues={{ usages: [{}] }}
+        initialValues={{ name: ticket?.fullName, date: dayjs(), gender: ticket?.genderDisplay, address: ticket?.address }}
       >
         <Row gutter={16}>
           <Col span={12}>
@@ -200,23 +245,11 @@ const handleExportPdf = async () => {
             </Form.Item>
           </Col>
         </Row>
-        <Form.Item
-          {...fullLayout}
-          label="Loại khám"
-          name="type"
-          rules={[{ required: true, message: 'Vui lòng chọn loại khám' }]}
-        >
-          <Select
-            options={[
-              { label: 'Khám tổng quát', value: 'Khám tổng quát' },
-              { label: 'Khám nội', value: 'Khám nội' },
-            ]}
-          />
-        </Form.Item>
+
         <Form.Item
           {...fullLayout}
           label="Triệu chứng"
-          name="symptom"
+          name="symptoms"
           rules={[{ required: true, message: 'Vui lòng nhập triệu chứng' }]}
         >
           <Input.TextArea rows={4} />
@@ -226,6 +259,14 @@ const handleExportPdf = async () => {
           label="Chẩn đoán"
           name="diagnose"
           rules={[{ required: true, message: 'Vui lòng nhập chẩn đoán' }]}
+        >
+          <Input.TextArea rows={4} />
+        </Form.Item>
+        <Form.Item
+          {...fullLayout}
+          label="Căn dặn"
+          name="treatmentPlan"
+          rules={[{ required: true, message: 'Vui lòng nhập căn dặn' }]}
         >
           <Input.TextArea rows={4} />
         </Form.Item>
