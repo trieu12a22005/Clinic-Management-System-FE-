@@ -3,6 +3,8 @@ import { apiClient } from './axios';
 export interface RoomOption {
   roomID: string;
   roomName: string;
+  roomType?: string;
+  status?: string;
   facultyID?: string;
 }
 
@@ -20,6 +22,8 @@ const normalizeRoom = (item: unknown): RoomOption | null => {
   const room = item as {
     roomID?: unknown;
     roomName?: unknown;
+    roomType?: unknown;
+    status?: unknown;
     facultyID?: unknown;
   };
 
@@ -30,6 +34,8 @@ const normalizeRoom = (item: unknown): RoomOption | null => {
   return {
     roomID: room.roomID,
     roomName: room.roomName,
+    roomType: typeof room.roomType === 'string' ? room.roomType : undefined,
+    status: typeof room.status === 'string' ? room.status : undefined,
     facultyID: typeof room.facultyID === 'string' ? room.facultyID : undefined,
   };
 };
@@ -52,6 +58,11 @@ const extractRooms = (response: RoomsApiResponse | unknown): RoomOption[] => {
 };
 
 class RoomApi {
+  async getRooms(): Promise<RoomOption[]> {
+    const response = await apiClient.get<RoomsApiResponse>('/admin/room');
+    return extractRooms(response.data);
+  }
+
   async getRoomsByFaculty(facultyID: string): Promise<RoomOption[]> {
     const endpoints = ['/admin/rooms', '/admin/room'];
 

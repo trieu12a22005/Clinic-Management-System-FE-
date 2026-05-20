@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Col, DatePicker, Form, Input, InputNumber, Radio, Row, Space, Table } from 'antd';
-import { UsePostExamine, UsePrescription, UseTicketID } from './usePrescription';
+import { AutoComplete, Button, Col, DatePicker, Form, Input, InputNumber, Radio, Row, Space, Spin, Table, Tag } from 'antd';
+import { UseCompleteTicket, UseDisease, UsePostExamine, UsePrescription, UseTicketID } from './usePrescription';
 import type { Medicine } from '@/types/medicine';
 import { fullLayout, itemLayout } from './components/constant';
 import type { PrescriptionMedicine, TableRow, UsageItem } from '@/types/Prescription';
@@ -13,6 +13,9 @@ import dayjs from "dayjs";
 import type { PostExamineData } from '@/types/examine';
 const Prescription: React.FC = () => {
   const [keyword, setKeyword] = useState('');
+  const [diseaseKeyword, setDiseaseKeyword] = useState('');
+  const [diagnosisList, setDiagnosisList] = useState<{ diseaseID: string; diseaseName: string }[]>([]);
+  const [isSaved, setIsSaved] = useState(false);
   const [form] = Form.useForm();
   const { id } = useParams();
   const { ticket } = UseTicketID(id || '');
@@ -28,6 +31,29 @@ const Prescription: React.FC = () => {
   console.log('ticket data:', ticket);
   const [medicineList, setMedicineList] = useState<PrescriptionMedicine[]>([]);
   const { medicineOptions = [] } = UsePrescription(keyword);
+  const { diseaseOptions = [], isLoading: isDiseaseLoading } = UseDisease(diseaseKeyword);
+  const diseaseSelectOptions = (diseaseOptions ?? []).map((d) => ({
+    value: d.diseaseID,
+    label: d.diseaseName,
+  }));
+  const handleSelectDisease = (selectedID: string) => {
+    if (diagnosisList.some((d) => d.diseaseID === selectedID)) {
+      toast.error('Bệnh này đã được thêm vào chẩn đoán');
+      setDiseaseKeyword('');
+      return;
+    }
+    const selected = (diseaseOptions ?? []).find((d) => d.diseaseID === selectedID);
+    if (!selected) return;
+    const updated = [...diagnosisList, { diseaseID: selected.diseaseID, diseaseName: selected.diseaseName }];
+    setDiagnosisList(updated);
+    form.setFieldsValue({ diagnose: updated.map((d) => d.diseaseID).join(', ') });
+    setDiseaseKeyword('');
+  };
+  const handleRemoveDisease = (diseaseID: string) => {
+    const updated = diagnosisList.filter((d) => d.diseaseID !== diseaseID);
+    setDiagnosisList(updated);
+    form.setFieldsValue({ diagnose: updated.map((d) => d.diseaseID).join(', ') });
+  };
   const naviagate = useNavigate();
   const medicineSelectOptions = medicineOptions.map((item: Medicine) => ({
     label: item.medicineName,
@@ -112,10 +138,12 @@ const Prescription: React.FC = () => {
     const pdfData = buildPdfData({
       values,
       medicineList,
+      diagnoseText: diagnosisList.map((d) => d.diseaseName).join(', '),
     });
     await exportPrescriptionPdf(pdfData);
   };
   const { mutate } = UsePostExamine();
+  const { mutate: completeTicket, isPending: isCompleting } = UseCompleteTicket();
 
   const onFinish = (values: PostExamineData) => {
     const payload = {
@@ -123,7 +151,7 @@ const Prescription: React.FC = () => {
       medicines: medicineList,
     };
     const examineData: PostExamineData = {
-      appointmentID: ticket?.appointmentID || '',
+      enterTicketID: ticket?.ticketID || '',
       patientID: ticket?.patientID || '',
       symptoms: payload.symptoms,
       status: "done",
@@ -137,12 +165,27 @@ const Prescription: React.FC = () => {
       onSuccess: (response) => {
         console.log('Lưu phiếu khám thành công:', response);
         toast.success('Lưu phiếu khám thành công');
-        naviagate("/waiting-room");
-
+        setIsSaved(true);
       },
       onError: (error) => {
         console.error('Lỗi:', error);
         toast.error('Lưu phiếu khám thất bại');
+      },
+    });
+  };
+  const handleComplete = () => {
+    if (!isSaved) {
+      toast.error('Vui lòng lưu phiếu khám trước khi hoàn thành!');
+      return;
+    }
+    completeTicket(ticket?.ticketID || '', {
+      onSuccess: () => {
+        toast.success('Hoàn thành khám bệnh!');
+        naviagate('/waiting-room');
+      },
+      onError: (error) => {
+        console.error('Lỗi hoàn thành khám:', error);
+        toast.error('Hoàn thành khám thất bại');
       },
     });
   };
@@ -257,10 +300,65 @@ const Prescription: React.FC = () => {
         <Form.Item
           {...fullLayout}
           label="Chẩn đoán"
-          name="diagnose"
-          rules={[{ required: true, message: 'Vui lòng nhập chẩn đoán' }]}
         >
-          <Input.TextArea rows={4} />
+          <AutoComplete
+            value={diseaseKeyword}
+            onChange={setDiseaseKeyword}
+            onSelect={handleSelectDisease}
+            options={diseaseSelectOptions}
+            notFoundContent={
+              diseaseKeyword
+                ? isDiseaseLoading ? <Spin size="small" /> : 'Không tìm thấy bệnh'
+                : null
+            }
+            style={{ width: '100%', marginBottom: 8 }}
+            placeholder="Tìm kiếm tên bệnh để thêm vào chẩn đoán..."
+            allowClear
+          />
+        </Form.Item>
+        <Form.Item
+          {...fullLayout}
+          label=" "
+          colon={false}
+          name="diagnose"
+          rules={[{ required: true, message: 'Vui lòng chọn ít nhất một bệnh' }]}
+        >
+          <Input type="hidden" />
+        </Form.Item>
+        <Form.Item
+          {...fullLayout}
+          label=" "
+          colon={false}
+        >
+          <div
+            style={{
+              minHeight: 48,
+              border: '1px solid #d9d9d9',
+              borderRadius: 6,
+              padding: '6px 10px',
+              background: '#fafafa',
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: 6,
+              alignItems: 'center',
+            }}
+          >
+            {diagnosisList.length === 0 ? (
+              <span style={{ color: '#bfbfbf', fontSize: 14 }}>Chưa chọn bệnh nào</span>
+            ) : (
+              diagnosisList.map((item) => (
+                <Tag
+                  key={item.diseaseID}
+                  closable
+                  onClose={() => handleRemoveDisease(item.diseaseID)}
+                  color="blue"
+                  style={{ fontSize: 13, padding: '2px 8px' }}
+                >
+                  {item.diseaseName}
+                </Tag>
+              ))
+            )}
+          </div>
         </Form.Item>
         <Form.Item
           {...fullLayout}
@@ -309,6 +407,8 @@ const Prescription: React.FC = () => {
                 form.resetFields();
                 form.setFieldsValue({ usages: [{}] });
                 setMedicineList([]);
+                setDiagnosisList([]);
+                setIsSaved(false);
               }}
             >
               Hủy
@@ -317,6 +417,16 @@ const Prescription: React.FC = () => {
               Lưu phiếu khám
             </Button>
             <Button onClick={handleExportPdf}>In PDF</Button>
+            <Button
+              type="primary"
+              danger
+              onClick={handleComplete}
+              loading={isCompleting}
+              disabled={!isSaved}
+              title={!isSaved ? 'Vui lòng lưu phiếu khám trước' : ''}
+            >
+              Hoàn thành khám
+            </Button>
           </Space>
         </Form.Item>
       </Form>

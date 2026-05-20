@@ -8,6 +8,8 @@ type BuildPdfDataParams = {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   values: Record<string, any>;
   medicineList: PrescriptionMedicine[];
+  /** Tên bệnh để in PDF (thay cho mã bệnh gửi backend) */
+  diagnoseText?: string;
 };
 
 const getMedicineUsageText = (usages: PrescriptionMedicine['usages']) =>
@@ -30,6 +32,7 @@ const getMedicineTotalQuantity = (usages: PrescriptionMedicine['usages']) =>
 export const buildPdfData = ({
   values,
   medicineList,
+  diagnoseText,
 }: BuildPdfDataParams): PrescriptionPdfData => {
   return {
     name: values.name || '',
@@ -41,7 +44,7 @@ export const buildPdfData = ({
     pressure: values.pressure || '',
     type: values.type || '',
     symptom: values.symptom || '',
-    diagnose: values.diagnose || '',
+    diagnose: diagnoseText ?? values.diagnose ?? '',
     note: values.note || '',
     medicines: medicineList.map((item) => ({
       medicineName: item.medicineName,

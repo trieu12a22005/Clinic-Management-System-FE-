@@ -14,3 +14,19 @@ export interface BM1Response {
     totalPatients: number;
     data: BM1Item[];
 }
+
+// BM3 - Danh Sách Bệnh Nhân
+export interface BM3Item {
+    stt: number;
+    fullName: string;
+    date: string;
+    diseaseType: string;
+    symptoms: string;
+}
+
+export interface BM3Response {
+    title: string;
+    date: string;
+    totalPatients: number;
+    data: BM3Item[];
+}

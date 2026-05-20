@@ -1,6 +1,5 @@
 export interface PostExamineData {
-  ticketID?: string;
-  appointmentID: string;
+  enterTicketID: string;
   patientID: string;
   symptoms: string;
   status: string;

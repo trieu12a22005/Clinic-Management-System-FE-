@@ -1,5 +1,5 @@
 import roomApi from '@/apis/room';
-import type { Room } from '@/types/roomType';
+import type { RoomOption } from '@/apis/room';
 import { useQuery } from '@tanstack/react-query';
 
 const RoomService = () => {
@@ -7,7 +7,7 @@ const RoomService = () => {
         queryKey: ['rooms'],
         queryFn: async () => {
             const res = await roomApi.getRooms();
-            return res.rooms as Room[];
+            return res as RoomOption[];
         }
     });
     return {

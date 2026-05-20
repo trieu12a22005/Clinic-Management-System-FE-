@@ -10,7 +10,13 @@ class TicketApi {
   async getTicketById(id: string) {
     const response = await apiClient.get(`/examine/ticket/${id}`);
     return response.data;
-  } 
+  }
+  async completeTicket(ticketID: string) {
+    const response = await apiClient.patch(`/examine/ticket/${ticketID}`, {
+      status: 'done',
+    });
+    return response.data;
+  }
 }
 const ticketApi = new TicketApi();
 export default ticketApi;

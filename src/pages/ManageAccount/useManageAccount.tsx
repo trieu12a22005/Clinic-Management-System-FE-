@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import accountApi from '../../apis/ManageAccount';
 import roleApi from '../../apis/role';
+import type { RoleRow } from '@/types/role';
 import toast from 'react-hot-toast';
 export const useManageAccount = () => {
     const queryClient = useQueryClient();
@@ -68,8 +69,8 @@ export const useManageAccount = () => {
     const rolesQuery = useQuery({
         queryKey: ['roles'],
         queryFn: async () => {
-            const res = await roleApi.getRoles();
-            return res.data as { roleID: string; roleName: string; roleDescription: string }[];
+            const res = await roleApi.getRolesList();
+            return res as RoleRow[];
         },
     });
 
