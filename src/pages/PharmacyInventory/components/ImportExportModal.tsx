@@ -118,7 +118,8 @@ export const ImportExportModal = ({
       if (imexType === 'export' && row.medicineID) {
         const medicine = getMedicineById(row.medicineID);
         if (medicine && parseInt(row.quantity) > medicine.quantity) {
-          newErrors[`${row.id}-quantity`] = `Chỉ còn ${medicine.quantity} ${medicine.unit} trong kho`;
+          const unitName = typeof medicine.unit === 'object' && medicine.unit !== null ? (medicine.unit as any).unitName : medicine.unit;
+          newErrors[`${row.id}-quantity`] = `Chỉ còn ${medicine.quantity} ${unitName} trong kho`;
           hasError = true;
         }
       }
@@ -267,7 +268,7 @@ export const ImportExportModal = ({
                         <option value="">Chọn thuốc...</option>
                         {medicines.map((med) => (
                           <option key={med.medicineID} value={med.medicineID}>
-                            {med.medicineName} ({med.unit}) - Còn: {med.quantity}
+                            {med.medicineName} ({typeof med.unit === 'object' && med.unit !== null ? (med.unit as any).unitName : med.unit}) - Còn: {med.quantity}
                           </option>
                         ))}
                       </select>

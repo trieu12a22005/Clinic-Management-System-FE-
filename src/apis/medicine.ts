@@ -35,12 +35,50 @@ export interface UpdateMedicineTicketStatusResponse {
   data: MedicineTicket;
 }
 
-export type MedicineUnit = 'bottle' | 'capsule' | 'patches';
+export interface MedicineUnitItem {
+  unitID: number;
+  unitName: string;
+}
+
+export interface GetMedicineUnitsResponse {
+  message: string;
+  data: MedicineUnitItem[];
+}
+
+export interface CreateMedicineUnitPayload {
+  unitName: string;
+}
+
+export interface CreateMedicineUnitResponse {
+  message: string;
+  data: MedicineUnitItem;
+}
+
+export interface MedicineUsageItem {
+  id: number;
+  usage: string;
+}
+
+export interface GetMedicineUsagesResponse {
+  message: string;
+  data: MedicineUsageItem[];
+}
+
+export interface CreateMedicineUsagePayload {
+  usage: string;
+}
+
+export interface CreateMedicineUsageResponse {
+  message: string;
+  data: MedicineUsageItem;
+}
+
+export type MedicineUnit = 'bottle' | 'capsule' | 'patches' | string | number;
 
 export interface MedicineItem {
   medicineID: number;
   medicineName: string;
-  unit: MedicineUnit;
+  unit: MedicineUnit | MedicineUnitItem;
   price: number;
   quantity: number;
   description?: string;
@@ -51,7 +89,7 @@ export interface MedicineItem {
 
 export interface CreateMedicineItemPayload {
   medicineName: string;
-  unit: MedicineUnit;
+  unitID: number;
   price: number;
   description?: string;
   image?: File | Blob;
@@ -64,7 +102,7 @@ export interface CreateMedicineItemResponse {
 
 export interface CreateManyMedicineItemInput {
   medicineName: string;
-  unit: MedicineUnit;
+  unitID: number;
   price: number;
   description?: string;
 }
@@ -115,7 +153,7 @@ export interface GetMedicineItemByIdResponse {
 
 export interface UpdateMedicineItemPayload {
   medicineName?: string;
-  unit?: MedicineUnit;
+  unitID?: number;
   price?: number;
   description?: string;
   image?: File | Blob;
@@ -206,8 +244,8 @@ class MedicineApi {
       formData.append('medicineName', payload.medicineName);
     }
 
-    if (payload.unit !== undefined) {
-      formData.append('unit', payload.unit);
+    if (payload.unitID !== undefined) {
+      formData.append('unitID', String(payload.unitID));
     }
 
     if (payload.price !== undefined) {
@@ -521,6 +559,36 @@ class MedicineApi {
       `/medicine/tickets/${ticketId}/status`,
       payload
     );
+    return response.data;
+  }
+
+  async getMedicineUnits() {
+    const response = await apiClient.get<GetMedicineUnitsResponse>('/medicine/units');
+    return response.data;
+  }
+
+  async createMedicineUnit(payload: CreateMedicineUnitPayload) {
+    const response = await apiClient.post<CreateMedicineUnitResponse>('/medicine/units', payload);
+    return response.data;
+  }
+
+  async deleteMedicineUnit(id: number) {
+    const response = await apiClient.delete(`/medicine/units/${id}`);
+    return response.data;
+  }
+
+  async getMedicineUsages() {
+    const response = await apiClient.get<GetMedicineUsagesResponse>('/medicine/usages');
+    return response.data;
+  }
+
+  async createMedicineUsage(payload: CreateMedicineUsagePayload) {
+    const response = await apiClient.post<CreateMedicineUsageResponse>('/medicine/usages', payload);
+    return response.data;
+  }
+
+  async deleteMedicineUsage(id: number) {
+    const response = await apiClient.delete(`/medicine/usages/${id}`);
     return response.data;
   }
 }

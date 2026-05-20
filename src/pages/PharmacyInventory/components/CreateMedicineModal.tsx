@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import type { MedicineUnit, CreateManyMedicineItemInput } from '../../../apis/medicine';
+import { useQuery } from '@tanstack/react-query';
+import medicineApi from '../../../apis/medicine';
 
 interface MedicineRow {
   id: string;
@@ -16,18 +18,14 @@ interface CreateMedicineModalProps {
   isLoading?: boolean;
 }
 
-const unitOptions: { value: MedicineUnit; label: string }[] = [
-  { value: 'bottle', label: 'Chai' },
-  { value: 'capsule', label: 'Viên' },
-  { value: 'patches', label: 'Miếng' },
-];
+
 
 const generateId = () => Math.random().toString(36).substring(2, 11);
 
 const emptyRow = (): MedicineRow => ({
   id: generateId(),
   medicineName: '',
-  unit: 'capsule',
+  unit: '',
   price: '',
   description: '',
 });
@@ -40,6 +38,12 @@ export const CreateMedicineModal = ({
 }: CreateMedicineModalProps) => {
   const [rows, setRows] = useState<MedicineRow[]>([emptyRow()]);
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const { data: unitsResponse } = useQuery({
+    queryKey: ['medicineUnits'],
+    queryFn: () => medicineApi.getMedicineUnits(),
+  });
+  const units = unitsResponse?.data || [];
 
   const addRow = () => {
     setRows([...rows, emptyRow()]);
@@ -76,6 +80,10 @@ export const CreateMedicineModal = ({
         newErrors[`${row.id}-name`] = 'Vui lòng nhập tên thuốc';
         hasError = true;
       }
+      if (!row.unit) {
+        newErrors[`${row.id}-unit`] = 'Vui lòng chọn đơn vị';
+        hasError = true;
+      }
       if (!row.price || parseFloat(row.price) <= 0) {
         newErrors[`${row.id}-price`] = 'Giá phải lớn hơn 0';
         hasError = true;
@@ -93,7 +101,7 @@ export const CreateMedicineModal = ({
       .filter((row) => row.medicineName.trim())
       .map((row) => ({
         medicineName: row.medicineName.trim(),
-        unit: row.unit,
+        unitID: Number(row.unit),
         price: parseFloat(row.price),
         description: row.description.trim() || undefined,
       }));
@@ -163,9 +171,8 @@ export const CreateMedicineModal = ({
                       value={row.medicineName}
                       onChange={(e) => updateRow(row.id, 'medicineName', e.target.value)}
                       placeholder="Ví dụ: Paracetamol 500mg"
-                      className={`w-full rounded-lg border px-3 py-2 text-sm focus:border-blue-500 focus:outline-none ${
-                        errors[`${row.id}-name`] ? 'border-rose-300' : 'border-gray-300'
-                      }`}
+                      className={`w-full rounded-lg border px-3 py-2 text-sm focus:border-blue-500 focus:outline-none ${errors[`${row.id}-name`] ? 'border-rose-300' : 'border-gray-300'
+                        }`}
                     />
                     {errors[`${row.id}-name`] && (
                       <p className="mt-1 text-xs text-rose-500">{errors[`${row.id}-name`]}</p>
@@ -179,14 +186,19 @@ export const CreateMedicineModal = ({
                     <select
                       value={row.unit}
                       onChange={(e) => updateRow(row.id, 'unit', e.target.value)}
-                      className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                      className={`w-full rounded-lg border px-3 py-2 text-sm focus:border-blue-500 focus:outline-none ${errors[`${row.id}-unit`] ? 'border-rose-300' : 'border-gray-300'
+                        }`}
                     >
-                      {unitOptions.map((opt) => (
-                        <option key={opt.value} value={opt.value}>
-                          {opt.label}
+                      <option value="">Chọn đơn vị</option>
+                      {units.map((opt) => (
+                        <option key={opt.unitID} value={opt.unitID}>
+                          {opt.unitName}
                         </option>
                       ))}
                     </select>
+                    {errors[`${row.id}-unit`] && (
+                      <p className="mt-1 text-xs text-rose-500">{errors[`${row.id}-unit`]}</p>
+                    )}
                   </div>
 
                   <div>
@@ -199,9 +211,8 @@ export const CreateMedicineModal = ({
                       onChange={(e) => updateRow(row.id, 'price', e.target.value)}
                       placeholder="0"
                       min="0"
-                      className={`w-full rounded-lg border px-3 py-2 text-sm focus:border-blue-500 focus:outline-none ${
-                        errors[`${row.id}-price`] ? 'border-rose-300' : 'border-gray-300'
-                      }`}
+                      className={`w-full rounded-lg border px-3 py-2 text-sm focus:border-blue-500 focus:outline-none ${errors[`${row.id}-price`] ? 'border-rose-300' : 'border-gray-300'
+                        }`}
                     />
                     {errors[`${row.id}-price`] && (
                       <p className="mt-1 text-xs text-rose-500">{errors[`${row.id}-price`]}</p>

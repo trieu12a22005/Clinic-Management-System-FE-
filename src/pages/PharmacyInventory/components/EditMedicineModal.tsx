@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import type { MedicineItem, MedicineUnit, UpdateMedicineItemPayload } from '../../../apis/medicine';
+import { useQuery } from '@tanstack/react-query';
+import medicineApi from '../../../apis/medicine';
 
 interface EditMedicineModalProps {
   medicine: MedicineItem | null;
@@ -9,11 +11,7 @@ interface EditMedicineModalProps {
   isLoading?: boolean;
 }
 
-const unitOptions: { value: MedicineUnit; label: string }[] = [
-  { value: 'bottle', label: 'Chai' },
-  { value: 'capsule', label: 'Viên' },
-  { value: 'patches', label: 'Miếng' },
-];
+
 
 export const EditMedicineModal = ({
   medicine,
@@ -24,7 +22,7 @@ export const EditMedicineModal = ({
 }: EditMedicineModalProps) => {
   const [formData, setFormData] = useState({
     medicineName: '',
-    unit: 'capsule' as MedicineUnit,
+    unit: '' as MedicineUnit,
     price: '',
     description: '',
   });
@@ -36,7 +34,7 @@ export const EditMedicineModal = ({
     if (medicine) {
       setFormData({
         medicineName: medicine.medicineName || '',
-        unit: medicine.unit,
+        unit: (typeof medicine.unit === 'object' && medicine.unit !== null ? (medicine.unit as any).unitID : medicine.unit) as MedicineUnit,
         price: medicine.price?.toString() || '',
         description: medicine.description || '',
       });
@@ -45,6 +43,12 @@ export const EditMedicineModal = ({
       setErrors({});
     }
   }, [medicine]);
+
+  const { data: unitsResponse } = useQuery({
+    queryKey: ['medicineUnits'],
+    queryFn: () => medicineApi.getMedicineUnits(),
+  });
+  const units = unitsResponse?.data || [];
 
   const validate = (): boolean => {
     const newErrors: Record<string, string> = {};
@@ -68,8 +72,9 @@ export const EditMedicineModal = ({
     if (formData.medicineName !== medicine.medicineName) {
       payload.medicineName = formData.medicineName;
     }
-    if (formData.unit !== medicine.unit) {
-      payload.unit = formData.unit;
+    const originalUnit = typeof medicine.unit === 'object' && medicine.unit !== null ? (medicine.unit as any).unitID : medicine.unit;
+    if (String(formData.unit) !== String(originalUnit)) {
+      payload.unitID = Number(formData.unit);
     }
     if (parseFloat(formData.price) !== medicine.price) {
       payload.price = parseFloat(formData.price);
@@ -150,9 +155,10 @@ export const EditMedicineModal = ({
                   onChange={(e) => setFormData({ ...formData, unit: e.target.value as MedicineUnit })}
                   className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
                 >
-                  {unitOptions.map((opt) => (
-                    <option key={opt.value} value={opt.value}>
-                      {opt.label}
+                  <option value="">Chọn đơn vị</option>
+                  {units.map((opt) => (
+                    <option key={opt.unitID} value={opt.unitID}>
+                      {opt.unitName}
                     </option>
                   ))}
                 </select>

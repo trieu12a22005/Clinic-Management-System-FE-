@@ -1,8 +1,3 @@
-export const usageOptions = [
-  { label: 'Uống sau ăn', value: 'Uống sau ăn' },
-  { label: 'Uống trước ăn', value: 'Uống trước ăn' },
-  { label: 'Uống khi cần thiết', value: 'Uống khi cần thiết' },
-];
 
 export const timeToTakeOptions = [
   { label: 'Sáng', value: 'Sáng' },

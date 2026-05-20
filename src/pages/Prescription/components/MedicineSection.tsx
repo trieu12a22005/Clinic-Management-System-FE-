@@ -1,7 +1,9 @@
 import React from 'react';
 import { Button, Col, Form, InputNumber, Row, Select } from 'antd';
 import { PlusCircleOutlined } from '@ant-design/icons';
-import { timeToTakeOptions, usageOptions } from './constant';
+import { timeToTakeOptions } from './constant';
+import { useQuery } from '@tanstack/react-query';
+import medicineApi from '@/apis/medicine';
 type Props = {
   medicineSelectOptions: { label: string; value: number }[];
   setKeyword: (value: string) => void;
@@ -13,6 +15,16 @@ const MedicineSection: React.FC<Props> = ({
   setKeyword,
   onAddMedicine,
 }) => {
+  const { data: usagesResponse } = useQuery({
+    queryKey: ['medicineUsages'],
+    queryFn: () => medicineApi.getMedicineUsages(),
+  });
+  
+  const dynamicUsageOptions = (usagesResponse?.data || []).map((u) => ({
+    label: u.usage,
+    value: u.usage,
+  }));
+
   return (
     <>
       <Row gutter={16} className="mt-2">
@@ -86,7 +98,7 @@ const MedicineSection: React.FC<Props> = ({
                     >
                       <Select
                         placeholder="Chọn cách dùng"
-                        options={usageOptions}
+                        options={dynamicUsageOptions}
                         allowClear
                       />
                     </Form.Item>

@@ -14,6 +14,7 @@ import EditMedicineModal from './components/EditMedicineModal';
 import ImportExportModal from './components/ImportExportModal';
 import ImexHistoryModal from './components/ImexHistoryModal';
 import Pagination from './components/Pagination';
+import { AddUnitModal } from './components/AddUnitModal';
 
 const MIN_STOCK = 100;
 
@@ -38,6 +39,7 @@ const PharmacyInventory = () => {
   const [isImportExportModalOpen, setIsImportExportModalOpen] = useState(false);
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
   const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
+  const [isAddUnitModalOpen, setIsAddUnitModalOpen] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
 
   // Selected medicine states
@@ -216,7 +218,8 @@ const PharmacyInventory = () => {
     setSelectedMedicine(medicine);
     setDeleteError(null);
     if (medicine.quantity > 0) {
-      setDeleteError(`Không thể xóa thuốc "${medicine.medicineName}" vì còn ${medicine.quantity} ${medicine.unit} trong kho.`);
+      const unitName = typeof medicine.unit === 'object' && medicine.unit !== null ? (medicine.unit as any).unitName : medicine.unit;
+      setDeleteError(`Không thể xóa thuốc "${medicine.medicineName}" vì còn ${medicine.quantity} ${unitName} trong kho.`);
     }
     setIsDeleteConfirmOpen(true);
   };
@@ -225,7 +228,8 @@ const PharmacyInventory = () => {
     if (!selectedMedicine) return;
 
     if (selectedMedicine.quantity > 0) {
-      setDeleteError(`Không thể xóa thuốc "${selectedMedicine.medicineName}" vì còn ${selectedMedicine.quantity} ${selectedMedicine.unit} trong kho.`);
+      const unitName = typeof selectedMedicine.unit === 'object' && selectedMedicine.unit !== null ? (selectedMedicine.unit as any).unitName : selectedMedicine.unit;
+      setDeleteError(`Không thể xóa thuốc "${selectedMedicine.medicineName}" vì còn ${selectedMedicine.quantity} ${unitName} trong kho.`);
       return;
     }
 
@@ -334,6 +338,15 @@ const PharmacyInventory = () => {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v12m0 0l-4-4m4 4l4-4M4 17h16" />
               </svg>
               Nhập/Xuất thuốc
+            </button>
+            <button
+              onClick={() => setIsAddUnitModalOpen(true)}
+              className="flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-700"
+            >
+              <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+              </svg>
+              Thêm đơn vị
             </button>
             <button
               onClick={() => setIsCreateModalOpen(true)}
@@ -578,6 +591,11 @@ const PharmacyInventory = () => {
       <ImexHistoryModal
         isOpen={isHistoryModalOpen}
         onClose={() => setIsHistoryModalOpen(false)}
+      />
+
+      <AddUnitModal
+        isOpen={isAddUnitModalOpen}
+        onClose={() => setIsAddUnitModalOpen(false)}
       />
     </div>
   );

@@ -8,13 +8,16 @@ import ConfirmDispenseModal from './components/ConfirmDispenseModal';
 import type { PrescriptionDetail as PrescriptionDetailType } from '@/apis/prescription';
 
 // Helper function to translate unit to Vietnamese
-const translateUnit = (unit: string): string => {
+const translateUnit = (unit: any): string => {
+  if (!unit) return '';
+  const unitStr = typeof unit === 'object' ? unit.unitName : String(unit);
+  if (!unitStr) return '';
   const unitMap: Record<string, string> = {
     'bottle': 'chai',
     'capsule': 'viên',
     'patches': 'miếng',
   };
-  return unitMap[unit.toLowerCase()] || unit;
+  return unitMap[unitStr.toLowerCase()] || unitStr;
 };
 
 interface StockCheckResult {
@@ -62,7 +65,7 @@ const PrescriptionDetail = () => {
       requiredQty,
       availableStock,
       isSufficient: availableStock >= requiredQty,
-      unit: medicine.unit,
+      unit: typeof medicine.unit === 'object' && medicine.unit !== null ? (medicine.unit as any).unitName : medicine.unit,
       unitVN: translateUnit(medicine.unit),
       usage: detail.usage,
       price: Number(medicine.price) || 0,

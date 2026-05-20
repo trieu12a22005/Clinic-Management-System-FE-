@@ -99,19 +99,22 @@ export const MedicineTable = ({
                     </div>
                   </div>
                 </td>
-                <td className="px-4 py-3">{unitLabels[medicine.unit] || medicine.unit}</td>
+                <td className="px-4 py-3">
+                  {typeof medicine.unit === 'object' && medicine.unit !== null
+                    ? (medicine.unit as any).unitName
+                    : unitLabels[medicine.unit as string] || medicine.unit}
+                </td>
                 <td className="px-4 py-3 text-right font-medium">
                   {formatNumber(medicine.price)} đ
                 </td>
                 <td className="px-4 py-3 text-right">
                   <span
-                    className={`font-semibold ${
-                      status === 'low-stock'
+                    className={`font-semibold ${status === 'low-stock'
                         ? 'text-amber-600'
                         : status === 'out-of-stock'
                           ? 'text-rose-600'
                           : 'text-gray-900'
-                    }`}
+                      }`}
                   >
                     {formatNumber(medicine.quantity)}
                   </span>

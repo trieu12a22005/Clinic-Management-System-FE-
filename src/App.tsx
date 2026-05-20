@@ -21,6 +21,7 @@ import RoleLayout from "./pages/Role/layout";
 import EditRolePage from "./pages/Role/EditRole";
 import EditRoleLayout from "./pages/Role/EditRole/Layout";
 import AppointmentPage from "./pages/Appointment";
+import SystemConfig from "./pages/SystemConfig/SystemConfig";
 // import './App.css';
 function App() {
   return (
@@ -48,6 +49,7 @@ function App() {
           <Route path="/pharmacy-queue/:prescriptionId" element={<PrescriptionDetail />} />
           <Route path="/pharmacy-inventory" element={<PharmacyInventory />} />
           <Route path="/prescription" element={<Prescription />} />
+          <Route path="/system-config" element={<SystemConfig />} />
 
           {/* role management */}
           <Route path="/role" element={<RoleLayout />}>

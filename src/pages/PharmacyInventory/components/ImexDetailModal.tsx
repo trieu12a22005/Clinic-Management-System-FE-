@@ -25,13 +25,14 @@ const formatNumber = (value?: number) => {
   return value.toLocaleString('vi-VN');
 };
 
-const getUnitLabel = (unit: string) => {
+const getUnitLabel = (unit: any) => {
+  if (typeof unit === 'object' && unit !== null) return unit.unitName;
   const labels: Record<string, string> = {
     bottle: 'Chai',
     capsule: 'Viên',
     patches: 'Miếng',
   };
-  return labels[unit] || unit;
+  return labels[String(unit)] || String(unit);
 };
 
 // Skeleton component for loading state

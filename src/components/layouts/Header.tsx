@@ -14,8 +14,7 @@ type NavItem = {
 const items2: MenuProps['items'] = [
   {
     key: '1',
-    label: 'My Account',
-    disabled: true,
+    label: 'System Config',
   },
   {
     type: 'divider',
@@ -63,10 +62,13 @@ const Header: React.FC = () => {
     navItems.find((i) => pathname === i.to || pathname.startsWith(i.to + "/"))
       ?.key ?? "";
   const handleClick: MenuProps["onClick"] = (e) => {
-    if (e.key === "3") {
+    if (e.key === "1") {
+      navigate('/system-config');
+    }
+    else if (e.key === "2") {
 
       mautition.mutate();
-    } else if (e.key === "2") {
+    } else if (e.key === "3") {
       navigate('/profile');
     }
   };
