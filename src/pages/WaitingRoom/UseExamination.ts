@@ -9,7 +9,8 @@ export const UseExamination = (params: EnterTicketParams) => {
         queryFn: async () => {
             const res = await ticketApi.getTicket(params);
             return mapEnterTicketRows(res.data);
-        }
+        },
+        enabled: !!params.roomID
     });
     return {
         examinations: query.data,

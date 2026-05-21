@@ -25,6 +25,9 @@ const Prescription: React.FC = () => {
         name: ticket.fullName,
         gender: ticket.genderDisplay,
         address: ticket.address,
+        phone: ticket.phoneNumber,
+        birthDate: ticket.birthDate,
+        symptoms: ticket.symptoms,
       });
     }
   }, [ticket, form]);

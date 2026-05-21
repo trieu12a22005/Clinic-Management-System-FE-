@@ -21,7 +21,8 @@ export interface EnterTicket {
       fullName: string;
       DisplayID: string;
       address: string;
-      phone: string;
+      phoneNumber: string;
+      birthDate: string;
       genderDisplay: string;
     };
   };
@@ -36,6 +37,8 @@ export interface EnterTicketRow {
   orderNum: number;
   fullName: string;
   roomName: string;
+  phoneNumber: string;
+  birthDate: string;
   checkIn: string;
   status: string;
   note: string;
@@ -44,5 +47,6 @@ export interface EnterTicketRow {
   DisplayID: string;
   address: string;
   genderDisplay: string;
+  symptoms?: string;
   previousRecord: string;
 }

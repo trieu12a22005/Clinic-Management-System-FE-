@@ -1,8 +1,12 @@
 import TimetableList from "./components/TimetableList";
+import { UseAuth } from "@/AuthContext";
 const Timetable = () => {
+    const { user } = UseAuth();
+
+    console.log(user);
     return (
         <div>
-            <TimetableList accountID="6bcb63c6-452c-4430-b065-90b7be524fff" />
+            <TimetableList accountID={user?.id || ""} />
         </div>
     )
 }

@@ -1,6 +1,6 @@
 
 import { useMemo, useState } from "react";
-import { useTimetable } from "../useTimetable";
+import { useTimetable, useAllTimetable } from "../useTimetable";
 import FacultyService from "@/services/facultyService";
 import FacultyFilter from "./FacultyFilter";
 import { Button, Dropdown } from "antd";
@@ -13,25 +13,34 @@ export interface WeekDay {
 }
 const TimetableList = ({ accountID }: { accountID: string }) => {
     const { timetables, isError, error } = useTimetable(accountID);
+    const { timetables: allTimetables } = useAllTimetable();
     const { faculties = [] } = FacultyService();
     const [activeTab, setActiveTab] = useState<string>('CÁ NHÂN');
     const [activeFacultyId, setActiveFacultyId] = useState<string | null>(null);
 
+    const currentTimetables = activeTab === 'TOÀN BỆNH VIỆN' ? allTimetables : timetables;
+
     // Group timetables by roomID → mỗi phòng 1 row, không cần API riêng
     const roomRows = useMemo(() => {
-        if (!timetables) return [];
-        const map = new Map<string, { roomID: string; roomName: string; facultyName?: string }>();
-        timetables.forEach((t) => {
+        if (!currentTimetables) return [];
+        const map = new Map<string, { roomID: string; roomName: string; facultyName?: string, facultyID?: string | number }>();
+        currentTimetables.forEach((t) => {
             if (!map.has(t.roomID)) {
                 map.set(t.roomID, {
                     roomID: t.roomID,
                     roomName: t.room.roomName,
                     facultyName: t.room.faculty?.facultyName,
+                    facultyID: t.room.faculty?.facultyID,
                 });
             }
         });
-        return Array.from(map.values());
-    }, [timetables]);
+
+        let rows = Array.from(map.values());
+        if (activeTab === 'TOÀN BỆNH VIỆN' && activeFacultyId) {
+            rows = rows.filter(r => r.facultyID?.toString() === activeFacultyId.toString());
+        }
+        return rows;
+    }, [currentTimetables, activeTab, activeFacultyId]);
     const tabs: string[] = ['CÁ NHÂN', 'TOÀN BỆNH VIỆN'];
     const weekDays: WeekDay[] = [
         { key: 'mon', label: 'Thứ 2', date: '02-03-2026' },
@@ -138,7 +147,7 @@ const TimetableList = ({ accountID }: { accountID: string }) => {
                                             <div className="text-xs font-normal mt-2 text-gray-500">{room.facultyName}</div>
                                         </td>
                                         {weekDays.map((day) => {
-                                            const entry = timetables?.find(
+                                            const entry = currentTimetables?.find(
                                                 (t) => t.roomID === room.roomID && t.dayOfWeek === day.key
                                             );
                                             if (entry) {

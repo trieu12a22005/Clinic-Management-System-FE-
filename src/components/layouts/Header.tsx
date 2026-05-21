@@ -65,10 +65,11 @@ const Header: React.FC = () => {
     if (e.key === "1") {
       navigate('/system-config');
     }
-    else if (e.key === "2") {
+    else if (e.key === "3") {
 
       mautition.mutate();
-    } else if (e.key === "3") {
+    }
+    else if (e.key === "2") {
       navigate('/profile');
     }
   };
