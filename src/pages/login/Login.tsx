@@ -36,7 +36,7 @@ const Login = () => {
     console.log("setUser", setUser);
     localStorage.setItem('user', JSON.stringify(res.user));
      toast.success("Đăng nhập thành công");
-      window.location.href = '/';
+     window.location.href = '/role_home';
     },
     onError: (error) => {
       

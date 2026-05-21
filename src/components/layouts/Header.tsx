@@ -1,52 +1,17 @@
-import { Avatar, Button, Dropdown, Menu, Space } from "antd";
+import { Avatar, Button, Dropdown, Space } from "antd";
 import type { MenuProps } from "antd";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { DownOutlined, LogoutOutlined, UserOutlined } from '@ant-design/icons';
 import { useMutation } from "@tanstack/react-query";
 import authApi from "@/apis/auth";
 import toast from "react-hot-toast";
 import { UseAuth } from "@/AuthContext";
-type NavItem = {
-  key: string;
-  label: string;
-  to: string;
-};
-const items2: MenuProps['items'] = [
-  {
-    key: '1',
-    label: 'System Config',
-  },
-  {
-    type: 'divider',
-  },
-  {
-    key: '2',
-    label: 'Profile',
-    extra: '⌘P',
-  },
-  {
-    key: '3',
-    label: 'Logout',
-    icon: <LogoutOutlined />,
-    extra: '⌘S',
-  },
-];
+
 const Header: React.FC = () => {
   const { user } = UseAuth();
-  const navItems: NavItem[] = [
-    { key: "home", label: "Home", to: "/" },
-    { key: "blog", label: "Blog", to: "/blog" },
-    { key: "resources", label: "Resources", to: "/resources" },
-    { key: user?.role || " ", label: user?.role || " ", to: "/role_home" },
-  ];
-
-  const items1: MenuProps["items"] = navItems.map((i) => ({
-    key: i.key,
-    label: <Link to={i.to}>{i.label}</Link>,
-  }));
   const currentName = user ? `${user.firstName} ${user.lastName}` : "";
-  const { pathname } = useLocation();
-  const mautition = useMutation({
+  const avatarUrl = user?.avatar;
+  const mutation = useMutation({
     mutationFn: () => authApi.logout(),
     onSuccess: () => {
       toast.success("Đăng xuất thành công");
@@ -58,58 +23,65 @@ const Header: React.FC = () => {
     },
   });
   const navigate = useNavigate();
-  const selectedKey =
-    navItems.find((i) => pathname === i.to || pathname.startsWith(i.to + "/"))
-      ?.key ?? "";
-  const handleClick: MenuProps["onClick"] = (e) => {
-    if (e.key === "1") {
-      navigate('/system-config');
-    }
-    else if (e.key === "3") {
 
-      mautition.mutate();
-    }
-    else if (e.key === "2") {
-      navigate('/profile');
-    }
+  const items2: MenuProps['items'] = [
+    {
+      key: '1',
+      label: 'Cấu hình hệ thống',
+    },
+    {
+      key: '2',
+      label: 'Trang cá nhân',
+    },
+    {
+      type: 'divider',
+    },
+    {
+      key: '3',
+      label: 'Đăng xuất',
+      icon: <LogoutOutlined />,
+      danger: true,
+    },
+  ];
+
+  const handleClick: MenuProps["onClick"] = (e) => {
+    if (e.key === "1") navigate('/system-config');
+    else if (e.key === "2") navigate('/profile');
+    else if (e.key === "3") mutation.mutate();
   };
+
   return (
     <header className="text-white font-bold shadow-md">
-      <div className="w-full px-6 flex items-center h-16">
-        {/* Left spacer */}
-        <div style={{ flex: 1 }} />
+      <div className="w-full px-6 flex items-center justify-between h-16">
+        {/* Logo bên trái */}
+        <Link to="/role_home" className="flex items-center gap-2">
+          <img
+            src="/images/logo.png"
+            alt="Clinic Logo"
+            className="h-14 w-auto object-contain"
+          />
+        </Link>
 
-        {/* Nav menu — perfectly centered, never collapses */}
-        <Menu
-          mode="horizontal"
-          selectedKeys={selectedKey ? [selectedKey] : []}
-          items={items1}
-          disabledOverflow
-          style={{
-            background: "transparent",
-            color: "white",
-            borderBottom: "none",
-            flex: "none",
-          }}
-        />
-
-        {/* Right — user section */}
-        <div style={{ flex: 1, display: 'flex', justifyContent: 'flex-end' }}>
+        {/* User section bên phải */}
+        <div className="flex items-center">
           {currentName !== "" ? (
-            <div className="flex items-center gap-4">
-              <Avatar size="large" icon={<UserOutlined />} />
-              <Dropdown menu={{ items: items2, onClick: handleClick }} placement="bottomRight" arrow>
-                <a onClick={(e) => e.preventDefault()}>
-                  <Space style={{ color: "black" }}>
-                    {currentName}
-                    <DownOutlined />
-                  </Space>
-                </a>
-              </Dropdown>
-            </div>
+            <Dropdown menu={{ items: items2, onClick: handleClick }} placement="bottomRight" arrow>
+              <a onClick={(e) => e.preventDefault()}>
+                <Space style={{ color: "#1f2937" }} className="cursor-pointer hover:opacity-80 transition-opacity">
+                  <Avatar
+                    size="default"
+                    src={avatarUrl || undefined}
+                    icon={!avatarUrl ? <UserOutlined /> : undefined}
+                    style={{ backgroundColor: '#4f46e5' }}
+                  />
+                  <span className="font-medium text-gray-800">{currentName}</span>
+                  <DownOutlined style={{ fontSize: 12, color: '#6b7280' }} />
+                </Space>
+              </a>
+            </Dropdown>
           ) : (
             <Link to="/login">
-              <Button type="primary">Login</Button>
+              <Button type="primary">Đăng nhập</Button>
             </Link>
           )}
         </div>

@@ -1,8 +1,9 @@
 import { Tabs, Typography } from 'antd';
-import { SettingOutlined, AppstoreOutlined, ExperimentOutlined } from '@ant-design/icons';
+import { SettingOutlined, AppstoreOutlined, ExperimentOutlined, MedicineBoxOutlined } from '@ant-design/icons';
 import { ConfigTab } from './components/ConfigTab';
 import { UnitTab } from './components/UnitTab';
 import { UsageTab } from './components/UsageTab';
+import { DiseaseTab } from './components/DiseaseTab';
 
 const { Title } = Typography;
 
@@ -64,6 +65,16 @@ const SystemConfig = () => {
                                 </span>
                             ),
                             children: <div className="mt-4"><UsageTab /></div>,
+                        },
+                        {
+                            key: 'diseases',
+                            label: (
+                                <span className="flex items-center gap-2">
+                                    <MedicineBoxOutlined />
+                                    Loại bệnh (ICD)
+                                </span>
+                            ),
+                            children: <div className="mt-4"><DiseaseTab /></div>,
                         },
                     ]}
                 />
