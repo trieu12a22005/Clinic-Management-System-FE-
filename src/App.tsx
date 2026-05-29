@@ -15,6 +15,7 @@ import Profile from "./pages/Profile/Profile";
 import Notification from "./pages/Notification/Notification";
 import ManageAccount from "./pages/ManageAccount/ManageAccount";
 import Report from "./pages/Report/Report";
+import SchedulePage from "./pages/Schedule/SchedulePage";
 
 import RoleDashboardPage from "./pages/Role/RoleDashboard";
 import RoleLayout from "./pages/Role/layout";
@@ -50,6 +51,7 @@ function App() {
           <Route path="/pharmacy-inventory" element={<PharmacyInventory />} />
           <Route path="/prescription" element={<Prescription />} />
           <Route path="/system-config" element={<SystemConfig />} />
+          <Route path="/schedule" element={<SchedulePage />} />
 
           {/* role management */}
           <Route path="/role" element={<RoleLayout />}>
