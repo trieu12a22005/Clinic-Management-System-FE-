@@ -55,7 +55,7 @@ const AppointmentPage = () => {
     isLoading: isFacultiesLoading,
   } = useQuery({
     queryKey: ['faculties'],
-    queryFn: () => facultyApi.getFaculty(),
+    queryFn: () => facultyApi.getFaculties(),
   });
 
   const appointments = useMemo(
@@ -64,7 +64,15 @@ const AppointmentPage = () => {
   );
 
   const faculties = useMemo(
-    () => ((facultiesResponse?.faculties ?? []) as Faculty[]),
+    () => {
+      const rawFaculties = facultiesResponse?.faculties ?? [];
+      return rawFaculties.map((f) => ({
+        facultyID: f.facultyID,
+        facultyName: f.facultyName,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      })) as Faculty[];
+    },
     [facultiesResponse]
   );
 
@@ -87,7 +95,7 @@ const AppointmentPage = () => {
         appointment.appointmentDisplayID,
         getPatientName(appointment),
         appointment.room?.roomName,
-        appointment.faculty?.facultyName,
+        appointment.room?.faculty?.facultyName,
         appointment.status,
         appointment.depositStatus,
       ]
