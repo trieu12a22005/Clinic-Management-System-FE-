@@ -35,11 +35,17 @@ const ScheduleTable = ({ facultyID, facultyName, roomCount }: ScheduleTableProps
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [selectedTimetableId, setSelectedTimetableId] = useState<string | null>(null);
     const [isDeleting, setIsDeleting] = useState(false);
+    const [draggedSchedule, setDraggedSchedule] = useState<TimetableObject | null>(null);
+    const [dragOverDay, setDragOverDay] = useState<DayOfWeek | null>(null);
+    const [isUpdating, setIsUpdating] = useState(false);
+    const [pendingTimetableId, setPendingTimetableId] = useState<string | null>(null);
 
-    const fetchTimetables = useCallback(async () => {
+    const fetchTimetables = useCallback(async ({ silent }: { silent?: boolean } = {}) => {
         if (!facultyID) return;
-        setLoading(true);
-        setError('');
+        if (!silent) {
+            setLoading(true);
+            setError('');
+        }
         try {
             const response = await timeTableApi.getAllTimetables(facultyID);
             setTimetables({
@@ -53,9 +59,13 @@ const ScheduleTable = ({ facultyID, facultyName, roomCount }: ScheduleTableProps
             });
         } catch (err) {
             console.error('Failed to fetch timetables:', err);
-            setError('Không thể tải dữ liệu thời khóa biểu.');
+            if (!silent) {
+                setError('Không thể tải dữ liệu thời khóa biểu.');
+            }
         } finally {
-            setLoading(false);
+            if (!silent) {
+                setLoading(false);
+            }
         }
     }, [facultyID]);
 
@@ -66,6 +76,70 @@ const ScheduleTable = ({ facultyID, facultyName, roomCount }: ScheduleTableProps
     const handleDeleteClick = (id: string) => {
         setSelectedTimetableId(id);
         setIsDeleteModalOpen(true);
+    };
+
+    const handleDragStart = (e: React.DragEvent<HTMLDivElement>, schedule: TimetableObject) => {
+        e.stopPropagation();
+        setDraggedSchedule(schedule);
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', schedule.timeID);
+    };
+
+    const handleDragOver = (e: React.DragEvent<HTMLTableDataCellElement>, day: DayOfWeek) => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        if (draggedSchedule && draggedSchedule.dayOfWeek !== day) {
+            setDragOverDay(day);
+        } else {
+            setDragOverDay(null);
+        }
+    };
+
+    const handleDragLeave = (e: React.DragEvent<HTMLTableDataCellElement>) => {
+        e.preventDefault();
+        setDragOverDay(null);
+    };
+
+    const handleDrop = async (e: React.DragEvent<HTMLTableDataCellElement>, targetDay: DayOfWeek) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        if (!draggedSchedule || draggedSchedule.dayOfWeek === targetDay) {
+            setDraggedSchedule(null);
+            setDragOverDay(null);
+            return;
+        }
+
+        const originalScheduleId = draggedSchedule.timeID;
+        const originalDay = draggedSchedule.dayOfWeek;
+        const updatedSchedule = { ...draggedSchedule, dayOfWeek: targetDay };
+
+        setIsUpdating(true);
+        setPendingTimetableId(originalScheduleId);
+        setTimetables((prev) => {
+            const next = { ...prev };
+            next[originalDay] = prev[originalDay].filter((item) => item.timeID !== originalScheduleId);
+            next[targetDay] = [...prev[targetDay], updatedSchedule];
+            return next;
+        });
+
+        try {
+            await timeTableApi.updateTimetable(originalScheduleId, {
+                dayOfWeek: targetDay,
+            });
+            toast.success('Cập nhật phân công thành công');
+            await fetchTimetables({ silent: true });
+            setPendingTimetableId(null);
+        } catch (err) {
+            console.error('Failed to update timetable:', err);
+            toast.error('Cập nhật phân công thất bại');
+            await fetchTimetables({ silent: true });
+            setPendingTimetableId(null);
+        } finally {
+            setIsUpdating(false);
+            setDraggedSchedule(null);
+            setDragOverDay(null);
+        }
     };
 
     const handleConfirmDelete = async () => {
@@ -148,38 +222,57 @@ const ScheduleTable = ({ facultyID, facultyName, roomCount }: ScheduleTableProps
                                 return (
                                     <td
                                         key={day.key}
-                                        className="align-top border-r border-gray-200 last:border-r-0 p-3 bg-white"
+                                        className="align-top border-r border-gray-200 last:border-r-0 p-3 bg-white transition-colors"
+                                        onDragOver={(e) => handleDragOver(e, day.key)}
+                                        onDragLeave={handleDragLeave}
+                                        onDrop={(e) => handleDrop(e, day.key)}
                                     >
-                                        <div className="flex flex-col gap-3 min-h-[280px]">
+                                        <div
+                                            className={`flex flex-col gap-3 min-h-[280px] rounded-lg p-2 transition-all ${
+                                                dragOverDay === day.key
+                                                    ? 'bg-green-50 border-2 border-dashed border-green-400'
+                                                    : draggedSchedule
+                                                    ? 'border-2 border-dashed border-transparent'
+                                                    : ''
+                                            }`}
+                                        >
                                             {daySchedules.length > 0 ? (
                                                 daySchedules.map((schedule) => {
                                                     const accountName = `${schedule.account?.firstName ?? ''} ${schedule.account?.lastName ?? ''}`.trim();
                                                     const roomName = schedule.room?.roomName || schedule.room?.roomID || 'Phòng không xác định';
 
+                                                    const isDragged = draggedSchedule?.timeID === schedule.timeID;
+                                                    const isPending = pendingTimetableId === schedule.timeID;
                                                     return (
                                                         <div
                                                             key={schedule.timeID}
-                                                            className="group relative rounded-lg border border-blue-100 bg-blue-50 p-3 shadow-sm transition-all hover:border-blue-200 hover:shadow-md"
+                                                            draggable
+                                                            onDragStart={(e) => handleDragStart(e, schedule)}
+                                                            className={`group relative rounded-lg border border-blue-100 bg-blue-50 p-3 shadow-sm transition-all cursor-move hover:border-blue-200 hover:shadow-md ${
+                                                                isDragged ? 'opacity-50 bg-blue-100' : ''
+                                                            } ${isPending ? 'opacity-70' : ''}`}
                                                         >
-                                                            <button
-                                                                onClick={() => handleDeleteClick(schedule.timeID)}
-                                                                className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-rose-500 text-white opacity-0 shadow-sm transition-opacity group-hover:opacity-100 hover:bg-rose-600"
-                                                                title="Xóa phân công"
-                                                            >
-                                                                <svg
-                                                                    viewBox="0 0 24 24"
-                                                                    className="h-4 w-4"
-                                                                    fill="none"
-                                                                    stroke="currentColor"
-                                                                    strokeWidth={2.5}
+                                                            {!isPending && (
+                                                                <button
+                                                                    onClick={() => handleDeleteClick(schedule.timeID)}
+                                                                    className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-rose-500 text-white opacity-0 shadow-sm transition-opacity group-hover:opacity-100 hover:bg-rose-600"
+                                                                    title="Xóa phân công"
                                                                 >
-                                                                    <path
-                                                                        strokeLinecap="round"
-                                                                        strokeLinejoin="round"
-                                                                        d="M6 18L18 6M6 6l12 12"
-                                                                    />
-                                                                </svg>
-                                                            </button>
+                                                                    <svg
+                                                                        viewBox="0 0 24 24"
+                                                                        className="h-4 w-4"
+                                                                        fill="none"
+                                                                        stroke="currentColor"
+                                                                        strokeWidth={2.5}
+                                                                    >
+                                                                        <path
+                                                                            strokeLinecap="round"
+                                                                            strokeLinejoin="round"
+                                                                            d="M6 18L18 6M6 6l12 12"
+                                                                        />
+                                                                    </svg>
+                                                                </button>
+                                                            )}
                                                             <div className="text-sm font-semibold text-blue-900 pr-2">
                                                                 {accountName || 'Tài khoản không xác định'}
                                                             </div>
@@ -187,9 +280,9 @@ const ScheduleTable = ({ facultyID, facultyName, roomCount }: ScheduleTableProps
                                                                 <div>
                                                                     <span className="font-medium">Phòng:</span> {roomName}
                                                                 </div>
-                                                                <div className="mt-1 break-all">
+                                                                {/* <div className="mt-1 break-all">
                                                                     <span className="font-medium">ID Tài khoản:</span> {schedule.accountID}
-                                                                </div>
+                                                                </div> */}
                                                                 {schedule.note ? (
                                                                     <div className="mt-2 rounded-md bg-white/70 p-2 text-gray-600">
                                                                         {schedule.note}
