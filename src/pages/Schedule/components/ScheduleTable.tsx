@@ -1,6 +1,8 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useCallback } from 'react';
 import timeTableApi from '../../../apis/timetable';
 import type{ DayOfWeek, TimetableObject } from '../../../apis/timetable';
+import DeleteTimetableModal from './DeleteTimetableModal';
+import { toast } from 'react-hot-toast';
 
 interface ScheduleTableProps {
     facultyID: string;
@@ -30,34 +32,58 @@ const ScheduleTable = ({ facultyID, facultyName, roomCount }: ScheduleTableProps
     });
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string>('');
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [selectedTimetableId, setSelectedTimetableId] = useState<string | null>(null);
+    const [isDeleting, setIsDeleting] = useState(false);
+
+    const fetchTimetables = useCallback(async () => {
+        if (!facultyID) return;
+        setLoading(true);
+        setError('');
+        try {
+            const response = await timeTableApi.getAllTimetables(facultyID);
+            setTimetables({
+                mon: response.timetables.mon ?? [],
+                tue: response.timetables.tue ?? [],
+                wed: response.timetables.wed ?? [],
+                thu: response.timetables.thu ?? [],
+                fri: response.timetables.fri ?? [],
+                sat: response.timetables.sat ?? [],
+                sun: response.timetables.sun ?? [],
+            });
+        } catch (err) {
+            console.error('Failed to fetch timetables:', err);
+            setError('Không thể tải dữ liệu thời khóa biểu.');
+        } finally {
+            setLoading(false);
+        }
+    }, [facultyID]);
 
     useEffect(() => {
-        if (!facultyID) return;
-
-        const fetchTimetables = async () => {
-            setLoading(true);
-            setError('');
-            try {
-                const response = await timeTableApi.getAllTimetables(facultyID);
-                setTimetables({
-                    mon: response.timetables.mon ?? [],
-                    tue: response.timetables.tue ?? [],
-                    wed: response.timetables.wed ?? [],
-                    thu: response.timetables.thu ?? [],
-                    fri: response.timetables.fri ?? [],
-                    sat: response.timetables.sat ?? [],
-                    sun: response.timetables.sun ?? [],
-                });
-            } catch (err) {
-                console.error('Failed to fetch timetables:', err);
-                setError('Không thể tải dữ liệu thời khóa biểu.');
-            } finally {
-                setLoading(false);
-            }
-        };
-
         fetchTimetables();
-    }, [facultyID]);
+    }, [fetchTimetables]);
+
+    const handleDeleteClick = (id: string) => {
+        setSelectedTimetableId(id);
+        setIsDeleteModalOpen(true);
+    };
+
+    const handleConfirmDelete = async () => {
+        if (!selectedTimetableId) return;
+        setIsDeleting(true);
+        try {
+            await timeTableApi.deleteTimetable(selectedTimetableId);
+            toast.success('Xóa phân công thành công');
+            fetchTimetables();
+        } catch (err) {
+            console.error('Failed to delete timetable:', err);
+            toast.error('Xóa phân công thất bại');
+        } finally {
+            setIsDeleting(false);
+            setIsDeleteModalOpen(false);
+            setSelectedTimetableId(null);
+        }
+    };
 
     const totalAssignedByDay = useMemo(() => {
         return DAYS_OF_WEEK.reduce((acc, day) => {
@@ -133,9 +159,28 @@ const ScheduleTable = ({ facultyID, facultyName, roomCount }: ScheduleTableProps
                                                     return (
                                                         <div
                                                             key={schedule.timeID}
-                                                            className="rounded-lg border border-blue-100 bg-blue-50 p-3 shadow-sm"
+                                                            className="group relative rounded-lg border border-blue-100 bg-blue-50 p-3 shadow-sm transition-all hover:border-blue-200 hover:shadow-md"
                                                         >
-                                                            <div className="text-sm font-semibold text-blue-900">
+                                                            <button
+                                                                onClick={() => handleDeleteClick(schedule.timeID)}
+                                                                className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-rose-500 text-white opacity-0 shadow-sm transition-opacity group-hover:opacity-100 hover:bg-rose-600"
+                                                                title="Xóa phân công"
+                                                            >
+                                                                <svg
+                                                                    viewBox="0 0 24 24"
+                                                                    className="h-4 w-4"
+                                                                    fill="none"
+                                                                    stroke="currentColor"
+                                                                    strokeWidth={2.5}
+                                                                >
+                                                                    <path
+                                                                        strokeLinecap="round"
+                                                                        strokeLinejoin="round"
+                                                                        d="M6 18L18 6M6 6l12 12"
+                                                                    />
+                                                                </svg>
+                                                            </button>
+                                                            <div className="text-sm font-semibold text-blue-900 pr-2">
                                                                 {accountName || 'Tài khoản không xác định'}
                                                             </div>
                                                             <div className="mt-2 text-xs text-blue-700">
@@ -167,6 +212,13 @@ const ScheduleTable = ({ facultyID, facultyName, roomCount }: ScheduleTableProps
                     </tbody>
                 </table>
             </div>
+
+            <DeleteTimetableModal
+                open={isDeleteModalOpen}
+                isPending={isDeleting}
+                onClose={() => setIsDeleteModalOpen(false)}
+                onConfirm={handleConfirmDelete}
+            />
         </div>
     );
 };
