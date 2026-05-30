@@ -15,7 +15,6 @@ interface AddTimetableModalProps {
 const AddTimetableModal = ({
     open,
     facultyID,
-    dayOfWeek,
     isPending,
     existingAccountIDs,
     onClose,
@@ -69,7 +68,7 @@ const AddTimetableModal = ({
     }
 
     return (
-        <div className="absolute top-full left-0 right-0 z-50 mt-2 rounded-xl border border-gray-200 bg-white shadow-xl">
+        <div className="rounded-xl border border-gray-200 bg-white shadow-xl">
             <div className="flex items-center justify-between border-b border-gray-100 px-4 py-3">
                 <h3 className="text-sm font-semibold text-gray-900">Chọn nhân viên</h3>
                 <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors">

@@ -40,7 +40,7 @@ const SchedulePage = () => {
     }
 
     return (
-        <div className="p-6 max-w-[1600px] mx-auto">
+        <div className="p-6 max-w-[1600px] mx-auto min-h-screen flex flex-col">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
                 <div>
                     <h1 className="text-2xl font-bold text-gray-900">Lịch phân công hàng tuần</h1>
@@ -67,11 +67,13 @@ const SchedulePage = () => {
             </div>
 
             {selectedFacultyId ? (
-                <ScheduleTable 
-                    facultyID={selectedFacultyId} 
-                    facultyName={selectedFaculty?.facultyName || ''} 
-                    roomCount={selectedFaculty?.rooms?.length || 0}
-                />
+                <div className="flex-1 min-h-0">
+                    <ScheduleTable 
+                        facultyID={selectedFacultyId} 
+                        facultyName={selectedFaculty?.facultyName || ''} 
+                        roomCount={selectedFaculty?.rooms?.length || 0}
+                    />
+                </div>
             ) : (
                 <div className="bg-gray-50 rounded-xl border-2 border-dashed border-gray-200 text-gray-400 text-center py-20">
                     <p>Không tìm thấy dữ liệu khoa.</p>
