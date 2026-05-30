@@ -2,7 +2,9 @@ import { useEffect, useMemo, useState, useCallback } from 'react';
 import timeTableApi from '../../../apis/timetable';
 import type{ DayOfWeek, TimetableObject } from '../../../apis/timetable';
 import DeleteTimetableModal from './DeleteTimetableModal';
+import AddTimetableModal from './AddTimetableModal';
 import { toast } from 'react-hot-toast';
+import facultyApi from '../../../apis/faculty';
 
 interface ScheduleTableProps {
     facultyID: string;
@@ -35,10 +37,14 @@ const ScheduleTable = ({ facultyID, facultyName, roomCount }: ScheduleTableProps
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [selectedTimetableId, setSelectedTimetableId] = useState<string | null>(null);
     const [isDeleting, setIsDeleting] = useState(false);
+    const [isAdding, setIsAdding] = useState(false);
+    const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+    const [targetDayForAdd, setTargetDayForAdd] = useState<DayOfWeek | null>(null);
     const [draggedSchedule, setDraggedSchedule] = useState<TimetableObject | null>(null);
     const [dragOverDay, setDragOverDay] = useState<DayOfWeek | null>(null);
     const [isUpdating, setIsUpdating] = useState(false);
     const [pendingTimetableId, setPendingTimetableId] = useState<string | null>(null);
+    const [deletingTimetableId, setDeletingTimetableId] = useState<string | null>(null);
 
     const fetchTimetables = useCallback(async ({ silent }: { silent?: boolean } = {}) => {
         if (!facultyID) return;
@@ -78,6 +84,57 @@ const ScheduleTable = ({ facultyID, facultyName, roomCount }: ScheduleTableProps
         setIsDeleteModalOpen(true);
     };
 
+    const handleAddClick = (day: DayOfWeek) => {
+        setTargetDayForAdd(day);
+        setIsAddModalOpen(true);
+    };
+
+    const handleConfirmAdd = async (account: TimetableObject['account']) => {
+        if (!targetDayForAdd || !facultyID) return;
+
+        setIsAdding(true);
+        const tempID = `temp-${Date.now()}`;
+
+        try {
+            // Create optimistic timetable entry (we don't know which room yet)
+            const optimisticTimetable: Partial<TimetableObject> = {
+                timeID: tempID,
+                accountID: account.accountID,
+                dayOfWeek: targetDayForAdd,
+                note: null,
+                createdAt: new Date().toISOString(),
+                account,
+            };
+
+            setPendingTimetableId(tempID);
+            // Add optimistic entry without room info (will be filled on success)
+            setTimetables((prev) => ({
+                ...prev,
+                [targetDayForAdd]: [...prev[targetDayForAdd], optimisticTimetable as TimetableObject],
+            }));
+            setIsAddModalOpen(false);
+            setTargetDayForAdd(null);
+
+            // Let the backend handle room selection
+            await timeTableApi.createTimetable({
+                accountID: account.accountID,
+                facultyID: facultyID,
+                dayOfWeek: targetDayForAdd,
+            });
+
+            toast.success('Thêm phân công thành công');
+            await fetchTimetables({ silent: true });
+            setPendingTimetableId(null);
+        } catch (err) {
+            console.error('Failed to add timetable:', err);
+            toast.error('Thêm phân công thất bại');
+            await fetchTimetables({ silent: true });
+            setPendingTimetableId(null);
+        } finally {
+            setIsAdding(false);
+        }
+    };
+
     const handleDragStart = (e: React.DragEvent<HTMLDivElement>, schedule: TimetableObject) => {
         e.stopPropagation();
         setDraggedSchedule(schedule);
@@ -88,7 +145,13 @@ const ScheduleTable = ({ facultyID, facultyName, roomCount }: ScheduleTableProps
     const handleDragOver = (e: React.DragEvent<HTMLTableDataCellElement>, day: DayOfWeek) => {
         e.preventDefault();
         e.dataTransfer.dropEffect = 'move';
-        if (draggedSchedule && draggedSchedule.dayOfWeek !== day) {
+        const hasAvailableRoom = (timetables[day] ?? []).length < roomCount;
+        // Check if the dragged account is already working in a room on this day
+        const daySchedules = timetables[day] ?? [];
+        const accountAlreadyAssignedOnDay = draggedSchedule && daySchedules.some(
+            (s) => s.accountID === draggedSchedule.accountID
+        );
+        if (draggedSchedule && draggedSchedule.dayOfWeek !== day && hasAvailableRoom && !accountAlreadyAssignedOnDay) {
             setDragOverDay(day);
         } else {
             setDragOverDay(null);
@@ -97,7 +160,10 @@ const ScheduleTable = ({ facultyID, facultyName, roomCount }: ScheduleTableProps
 
     const handleDragLeave = (e: React.DragEvent<HTMLTableDataCellElement>) => {
         e.preventDefault();
-        setDragOverDay(null);
+        // Only clear dragOverDay if leaving the entire cell
+        if (e.currentTarget === e.target) {
+            setDragOverDay(null);
+        }
     };
 
     const handleDrop = async (e: React.DragEvent<HTMLTableDataCellElement>, targetDay: DayOfWeek) => {
@@ -112,6 +178,24 @@ const ScheduleTable = ({ facultyID, facultyName, roomCount }: ScheduleTableProps
 
         const originalScheduleId = draggedSchedule.timeID;
         const originalDay = draggedSchedule.dayOfWeek;
+        const targetDaySchedules = timetables[targetDay] ?? [];
+
+        // Check if there are available rooms
+        if (targetDaySchedules.length >= roomCount) {
+            toast.error('Không còn phòng trống cho ngày này');
+            setDraggedSchedule(null);
+            setDragOverDay(null);
+            return;
+        }
+
+        // Check if account is already assigned on the target day
+        if (targetDaySchedules.some((s) => s.accountID === draggedSchedule.accountID)) {
+            toast.error('Nhân viên này đã được phân công vào ngày này');
+            setDraggedSchedule(null);
+            setDragOverDay(null);
+            return;
+        }
+
         const updatedSchedule = { ...draggedSchedule, dayOfWeek: targetDay };
 
         setIsUpdating(true);
@@ -124,9 +208,13 @@ const ScheduleTable = ({ facultyID, facultyName, roomCount }: ScheduleTableProps
         });
 
         try {
-            await timeTableApi.updateTimetable(originalScheduleId, {
-                dayOfWeek: targetDay,
-            });
+            await timeTableApi.updateTimetable(
+                originalScheduleId,
+                {
+                    dayOfWeek: targetDay,
+                },
+                facultyID
+            );
             toast.success('Cập nhật phân công thành công');
             await fetchTimetables({ silent: true });
             setPendingTimetableId(null);
@@ -145,10 +233,12 @@ const ScheduleTable = ({ facultyID, facultyName, roomCount }: ScheduleTableProps
     const handleConfirmDelete = async () => {
         if (!selectedTimetableId) return;
         setIsDeleting(true);
+        setDeletingTimetableId(selectedTimetableId);
         try {
             await timeTableApi.deleteTimetable(selectedTimetableId);
             toast.success('Xóa phân công thành công');
-            fetchTimetables();
+            // Wait for new data to be fetched before updating the UI
+            await fetchTimetables({ silent: true });
         } catch (err) {
             console.error('Failed to delete timetable:', err);
             toast.error('Xóa phân công thất bại');
@@ -156,9 +246,9 @@ const ScheduleTable = ({ facultyID, facultyName, roomCount }: ScheduleTableProps
             setIsDeleting(false);
             setIsDeleteModalOpen(false);
             setSelectedTimetableId(null);
+            setDeletingTimetableId(null);
         }
     };
-
     const totalAssignedByDay = useMemo(() => {
         return DAYS_OF_WEEK.reduce((acc, day) => {
             acc[day.key] = timetables[day.key]?.length ?? 0;
@@ -228,11 +318,11 @@ const ScheduleTable = ({ facultyID, facultyName, roomCount }: ScheduleTableProps
                                         onDrop={(e) => handleDrop(e, day.key)}
                                     >
                                         <div
-                                            className={`flex flex-col gap-3 min-h-[280px] rounded-lg p-2 transition-all ${
+                                            className={`flex flex-col gap-3 min-h-[280px] rounded-lg p-2 border-2 border-dashed border-transparent transition-colors ${
                                                 dragOverDay === day.key
-                                                    ? 'bg-green-50 border-2 border-dashed border-green-400'
+                                                    ? 'bg-green-50 border-green-400'
                                                     : draggedSchedule
-                                                    ? 'border-2 border-dashed border-transparent'
+                                                    ? 'bg-transparent'
                                                     : ''
                                             }`}
                                         >
@@ -242,15 +332,15 @@ const ScheduleTable = ({ facultyID, facultyName, roomCount }: ScheduleTableProps
                                                     const roomName = schedule.room?.roomName || schedule.room?.roomID || 'Phòng không xác định';
 
                                                     const isDragged = draggedSchedule?.timeID === schedule.timeID;
-                                                    const isPending = pendingTimetableId === schedule.timeID;
+                                                    const isPending = pendingTimetableId === schedule.timeID || deletingTimetableId === schedule.timeID;
                                                     return (
                                                         <div
                                                             key={schedule.timeID}
-                                                            draggable
+                                                            draggable={!isPending}
                                                             onDragStart={(e) => handleDragStart(e, schedule)}
                                                             className={`group relative rounded-lg border border-blue-100 bg-blue-50 p-3 shadow-sm transition-all cursor-move hover:border-blue-200 hover:shadow-md ${
                                                                 isDragged ? 'opacity-50 bg-blue-100' : ''
-                                                            } ${isPending ? 'opacity-70' : ''}`}
+                                                            } ${isPending ? 'opacity-60 pointer-events-none' : ''}`}
                                                         >
                                                             {!isPending && (
                                                                 <button
@@ -295,6 +385,38 @@ const ScheduleTable = ({ facultyID, facultyName, roomCount }: ScheduleTableProps
                                             ) : (
                                                 <div className="flex flex-1 items-center justify-center rounded-lg border border-dashed border-gray-200 bg-gray-50 py-10 text-sm text-gray-400">
                                                     Chưa phân công
+                                                </div>
+                                            )}
+
+                                            {/* Add Button */}
+                                            {totalAssignedByDay[day.key] < roomCount && (
+                                                <div className="relative">
+                                                    <button
+                                                        onClick={() => handleAddClick(day.key)}
+                                                        className="mt-2 flex w-full items-center justify-center gap-2 rounded-lg border border-dashed border-gray-300 py-3 text-sm font-medium text-gray-500 transition-all hover:border-blue-400 hover:bg-blue-50 hover:text-blue-600"
+                                                    >
+                                                        <svg 
+                                                            className="h-4 w-4" 
+                                                            fill="none" 
+                                                            viewBox="0 0 24 24" 
+                                                            stroke="currentColor"
+                                                            strokeWidth={2}
+                                                        >
+                                                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                                                        </svg>
+                                                        <span>Thêm phân công</span>
+                                                    </button>
+                                                    {isAddModalOpen && targetDayForAdd === day.key && (
+                                                        <AddTimetableModal
+                                                            open={isAddModalOpen}
+                                                            facultyID={facultyID}
+                                                            dayOfWeek={day.key}
+                                                            isPending={isAdding}
+                                                            existingAccountIDs={new Set(daySchedules.map(s => s.accountID))}
+                                                            onClose={() => setIsAddModalOpen(false)}
+                                                            onConfirm={handleConfirmAdd}
+                                                        />
+                                                    )}
                                                 </div>
                                             )}
                                         </div>

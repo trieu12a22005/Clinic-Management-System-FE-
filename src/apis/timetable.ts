@@ -39,9 +39,10 @@ export interface TimetableObject {
 
 export interface CreateTimetableRequest {
   accountID: string;
-  roomID: string;
   dayOfWeek: DayOfWeek;
   note?: string;
+  roomID?: string;
+  facultyID?: string;
 }
 
 export interface TimetableResponse {
@@ -106,22 +107,24 @@ class TimeTableApi {
   }
 
   /**
-   * Get available users from a faculty that haven't been assigned on a chosen day
-   * @param facultyID - Required faculty ID
-   * @param dayOfWeek - Optional day to check availability. If omitted, returns all users in faculty.
+   * Get available users from a faculty
+   * @param facultyID - Required faculty ID to get all users in that faculty
    */
-  async getAvailableUsers(facultyID: string, dayOfWeek?: DayOfWeek | string): Promise<AvailableUsersResponse> {
+  async getAvailableUsers(facultyID: string): Promise<AvailableUsersResponse> {
     const response = await apiClient.get('/admin/timetables/available-users', {
-      params: { facultyID, dayOfWeek },
+      params: { facultyID },
     });
     return response.data;
   }
 
   /**
    * Update a timetable entry by ID
+   * @param facultyID - Optional facultyID query param to auto-select an available room
    */
-  async updateTimetable(id: string, data: Partial<CreateTimetableRequest>): Promise<TimetableResponse & { message: string }> {
-    const response = await apiClient.patch(`/admin/timetables/${id}`, data);
+  async updateTimetable(id: string, data: Partial<CreateTimetableRequest>, facultyID?: string): Promise<TimetableResponse & { message: string }> {
+    const response = await apiClient.patch(`/admin/timetables/${id}`, data, {
+      params: facultyID ? { facultyID } : undefined,
+    });
     return response.data;
   }
 
