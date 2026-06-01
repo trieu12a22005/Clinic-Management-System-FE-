@@ -102,6 +102,12 @@ const RoleHome = () => {
       description: "Xem lịch hẹn khám bệnh của bệnh nhân, xác nhận hoặc hủy lịch hẹn",
       path: "/appointment",
     },
+    {
+      id: 10,
+      title: "Trang xếp lịch làm việc",
+      description: "Xem và quản lý lịch làm việc của các nhân viên trong phòng khám",
+      path: "/schedule",
+    }
   ];
 
   // Token cho Calendar Ant Design

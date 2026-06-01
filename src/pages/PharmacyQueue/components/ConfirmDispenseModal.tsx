@@ -33,7 +33,10 @@ const ConfirmDispenseModal = ({
   }
 
   const totalMedicines = stockChecks.length;
-  const totalUnits = stockChecks.reduce((sum, check) => sum + check.requiredQty, 0);
+  const totalUnits = stockChecks.reduce(
+    (sum, check) => sum + (check.isSufficient ? check.requiredQty : 0),
+    0
+  );
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
@@ -65,7 +68,7 @@ const ConfirmDispenseModal = ({
               <li key={check.medicineID} className="flex justify-between">
                 <span className="truncate">• {check.medicineName}</span>
                 <span className="ml-2 font-medium">
-                  {check.requiredQty} {check.unitVN}
+                  {check.isSufficient ? check.requiredQty : 0} {check.unitVN}
                 </span>
               </li>
             ))}

@@ -21,13 +21,13 @@ const CurrentQueueCard = ({ currentItem, onViewPrescription }: CurrentQueueCardP
           </div>
         </div>
         <div className="flex flex-wrap gap-3">
-          <button className="inline-flex items-center gap-2 rounded-lg border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-600 transition hover:border-gray-300 hover:text-gray-800">
+          {/* <button className="inline-flex items-center gap-2 rounded-lg border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-600 transition hover:border-gray-300 hover:text-gray-800">
             <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
               <path strokeLinecap="round" strokeLinejoin="round" d="M17 21H7a2 2 0 01-2-2v-2a7 7 0 0114 0v2a2 2 0 01-2 2z" />
             </svg>
             Gọi số
-          </button>
+          </button> */}
           <button
             onClick={() => onViewPrescription(currentItem.prescriptionID, currentItem.ticketID)}
             className="inline-flex items-center gap-2 rounded-lg border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-600 transition hover:border-blue-200 hover:text-blue-600"
@@ -38,7 +38,7 @@ const CurrentQueueCard = ({ currentItem, onViewPrescription }: CurrentQueueCardP
             </svg>
             Xem đơn
           </button>
-          <button
+          {/* <button
             onClick={() => onViewPrescription(currentItem.prescriptionID, currentItem.ticketID)}
             className="inline-flex items-center gap-2 rounded-lg bg-[#1867c0] px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-700"
           >
@@ -47,7 +47,7 @@ const CurrentQueueCard = ({ currentItem, onViewPrescription }: CurrentQueueCardP
               <circle cx="12" cy="12" r="9" />
             </svg>
             Xác nhận phát thuốc
-          </button>
+          </button> */}
         </div>
       </div>
     </div>

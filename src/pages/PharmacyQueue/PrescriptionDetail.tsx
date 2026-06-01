@@ -3,7 +3,7 @@ import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-hot-toast';
 import prescriptionService from '@/apis/prescription';
-import { dispenseMedicine } from '@/apis/medicineTicket';
+import { dispenseMedicine, getMedicineTickets } from '@/apis/medicineTicket';
 import ConfirmDispenseModal from './components/ConfirmDispenseModal';
 import type { PrescriptionDetail as PrescriptionDetailType } from '@/apis/prescription';
 
@@ -18,6 +18,12 @@ const translateUnit = (unit: any): string => {
     'patches': 'miếng',
   };
   return unitMap[unitStr.toLowerCase()] || unitStr;
+};
+
+const formatPayAmount = (value?: number | string | null) => {
+  const amount = Number(value ?? 0);
+  if (Number.isNaN(amount)) return '0';
+  return new Intl.NumberFormat('vi-VN').format(amount);
 };
 
 interface StockCheckResult {
@@ -41,7 +47,7 @@ const PrescriptionDetail = () => {
   const queryClient = useQueryClient();
   const [confirmOpen, setConfirmOpen] = useState(false);
 
-  // Fetch prescription details (includes medicine info with stock)
+  // Fetch prescription details (includes medicine info with inventory quantity)
   const { data: prescriptionData, isLoading } = useQuery({
     queryKey: ['prescription', prescriptionId],
     queryFn: async () => {
@@ -52,12 +58,21 @@ const PrescriptionDetail = () => {
     enabled: !!prescriptionId,
   });
 
+  const { data: ticketsData } = useQuery({
+    queryKey: ['medicine-tickets'],
+    queryFn: () => getMedicineTickets(),
+    enabled: !!ticketId,
+  });
+
+  const currentTicket = ticketsData?.data.find((ticket) => ticket.ticketID === ticketId);
+  const canDispenseTicket = currentTicket?.status === 'pending';
+
   // Build stock check results from prescription details
   const stockChecks: StockCheckResult[] = prescriptionData?.details.map((detail: PrescriptionDetailType) => {
     const medicine = detail.medicine;
-    const requiredQty = detail.quantity;
-    const availableStock = medicine.quantity || 0;
-    
+    const requiredQty = Number(detail.quantity ?? 0);
+    const availableStock = Number((medicine as any).quantity ?? 0);
+
     return {
       medicineID: medicine.medicineID,
       medicineName: medicine.medicineName,
@@ -71,9 +86,6 @@ const PrescriptionDetail = () => {
       price: Number(medicine.price) || 0,
     };
   }) || [];
-
-  // Check if all medicines have sufficient stock
-  const allStockSufficient = stockChecks.length > 0 && stockChecks.every(check => check.isSufficient);
 
   // Dispense mutation
   const dispenseMutation = useMutation({
@@ -97,10 +109,6 @@ const PrescriptionDetail = () => {
   });
 
   const handleConfirmDispense = () => {
-    if (!allStockSufficient) {
-      toast.error('Không đủ tồn kho để phát thuốc');
-      return;
-    }
     if (!ticketId) {
       toast.error('Ticket ID không hợp lệ');
       return;
@@ -154,7 +162,7 @@ const PrescriptionDetail = () => {
           </button>
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Đơn thuốc #{prescriptionData.prescriptionDisplayID}</h1>
-            <p className="text-sm text-gray-500">Chi tiết đơn thuốc và kiểm tra tồn kho</p>
+            <p className="text-sm text-gray-500">Chi tiết đơn thuốc</p>
           </div>
         </div>
 
@@ -171,10 +179,14 @@ const PrescriptionDetail = () => {
             </span>
             Thông tin đơn thuốc
           </div>
-          <div className="grid grid-cols-2 gap-4 text-sm text-gray-700 md:grid-cols-4">
+          <div className="grid grid-cols-2 gap-4 text-sm text-gray-700 md:grid-cols-5">
             <div>
               <p className="text-xs text-gray-400">Mã đơn thuốc</p>
-              <p className="font-semibold">{prescriptionData.prescriptionID}</p>
+              <p className="font-semibold">{prescriptionData.prescriptionDisplayID}</p>
+            </div>
+            <div>
+              <p className="text-xs text-gray-400">Giá đơn thuốc</p>
+              <p className="font-semibold">{formatPayAmount(prescriptionData.payAmount)} đ</p>
             </div>
             <div>
               <p className="text-xs text-gray-400">Ngày tạo</p>
@@ -249,7 +261,7 @@ const PrescriptionDetail = () => {
                           <h3 className="font-semibold text-gray-900">{check.medicineName}</h3>
                           {!check.isSufficient && (
                             <span className="rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-600">
-                              Thiếu thuốc
+                              Thiếu tồn kho
                             </span>
                           )}
                         </div>
@@ -262,50 +274,20 @@ const PrescriptionDetail = () => {
                     <div className="flex items-center gap-4 text-sm">
                       <div className="text-right">
                         <p className="text-xs text-gray-400">Yêu cầu</p>
-                        <p className="font-semibold text-gray-700">
+                        <p className={`font-semibold ${check.isSufficient ? 'text-gray-700' : 'text-red-600'}`}>
                           {check.requiredQty} {check.unitVN}
                         </p>
                       </div>
                       <div className="text-right">
                         <p className="text-xs text-gray-400">Tồn kho</p>
-                        <p className={`font-semibold ${check.isSufficient ? 'text-green-600' : 'text-red-600'}`}>
+                        <p className={`font-semibold ${check.isSufficient ? 'text-gray-600' : 'text-red-600'}`}>
                           {check.availableStock} {check.unitVN}
                         </p>
                       </div>
                     </div>
                   </div>
-                  {!check.isSufficient && (
-                    <div className="mt-3 rounded-lg bg-red-100 px-3 py-2 text-sm text-red-700">
-                      <span className="font-medium">Cảnh báo:</span> Tồn kho không đủ. Cần thêm{' '}
-                      {check.requiredQty - check.availableStock} {check.unitVN} nữa.
-                    </div>
-                  )}
                 </div>
               ))}
-            </div>
-          )}
-
-          {/* Stock Status Summary */}
-          {stockChecks.length > 0 && (
-            <div className="mt-4 rounded-xl border border-gray-200 bg-gray-50 p-4">
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">Trạng thái tồn kho:</span>
-                {allStockSufficient ? (
-                  <span className="flex items-center gap-1 text-sm font-medium text-green-600">
-                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                    Đủ tồn kho để phát thuốc
-                  </span>
-                ) : (
-                  <span className="flex items-center gap-1 text-sm font-medium text-red-600">
-                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                    Thiếu thuốc - Không thể phát
-                  </span>
-                )}
-              </div>
             </div>
           )}
         </div>
@@ -318,17 +300,19 @@ const PrescriptionDetail = () => {
           >
             Quay lại
           </button>
-          <button
-            onClick={() => setConfirmOpen(true)}
-            disabled={!allStockSufficient || dispenseMutation.isPending || !ticketId}
-            className={`rounded-lg px-4 py-2 text-sm font-semibold text-white transition ${
-              allStockSufficient && !dispenseMutation.isPending && ticketId
-                ? 'bg-blue-600 hover:bg-blue-700'
-                : 'cursor-not-allowed bg-gray-300'
-            }`}
-          >
-            {dispenseMutation.isPending ? 'Đang xử lý...' : 'Xác nhận phát thuốc'}
-          </button>
+          {canDispenseTicket && (
+            <button
+              onClick={() => setConfirmOpen(true)}
+              disabled={dispenseMutation.isPending || !ticketId}
+              className={`rounded-lg px-4 py-2 text-sm font-semibold text-white transition ${
+                !dispenseMutation.isPending && ticketId
+                  ? 'bg-blue-600 hover:bg-blue-700'
+                  : 'cursor-not-allowed bg-gray-300'
+              }`}
+            >
+              {dispenseMutation.isPending ? 'Đang xử lý...' : 'Xác nhận phát thuốc'}
+            </button>
+          )}
         </div>
       </div>
 

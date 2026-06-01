@@ -1,9 +1,15 @@
+import { useEffect, useRef, useState } from 'react';
+import { useMutation } from '@tanstack/react-query';
+import { useReactToPrint } from 'react-to-print';
+import toast from 'react-hot-toast';
 import type {
   AppointmentDepositStatus,
   AppointmentItem,
   AppointmentStatus,
   AppointmentType,
 } from '@/apis/appointment';
+import receiptApi, { type ReceiptData } from '@/apis/receipt';
+import ReceiptTemplate from './ReceiptTemplate';
 
 type DisplayStatusFilter = 'all' | AppointmentStatus;
 
@@ -108,8 +114,6 @@ interface AppointmentTableProps {
   onResetToToday: () => void;
   statusFilter: DisplayStatusFilter;
   onStatusFilterChange: (value: DisplayStatusFilter) => void;
-  onDelete: (appointment: AppointmentItem) => void;
-  isDeleting: boolean;
 }
 
 const AppointmentTable = ({
@@ -124,10 +128,41 @@ const AppointmentTable = ({
   onResetToToday,
   statusFilter,
   onStatusFilterChange,
-  onDelete,
-  isDeleting,
 }: AppointmentTableProps) => {
   const skeletonRows = Array.from({ length: 5 });
+  const receiptRef = useRef<HTMLDivElement>(null);
+  const [receiptData, setReceiptData] = useState<ReceiptData | null>(null);
+  const [shouldPrint, setShouldPrint] = useState(false);
+
+  const handlePrint = useReactToPrint({
+    contentRef: receiptRef,
+    documentTitle: receiptData
+      ? `Hoa-don-${receiptData.appointmentDisplayID}`
+      : 'Hoa-don-thanh-toan',
+  });
+
+  const receiptMutation = useMutation({
+    mutationFn: (appointmentID: string) => receiptApi.getReceipt(appointmentID),
+    onSuccess: (response) => {
+      setReceiptData(response.data);
+      setShouldPrint(true);
+    },
+    onError: (error) => {
+      toast.error(
+        error instanceof Error ? error.message : 'Không thể tải hóa đơn thanh toán'
+      );
+    },
+  });
+
+  useEffect(() => {
+    if (!shouldPrint || !receiptData) return;
+    handlePrint();
+    setShouldPrint(false);
+  }, [handlePrint, receiptData, shouldPrint]);
+
+  const handlePrintReceipt = (appointment: AppointmentItem) => {
+    receiptMutation.mutate(appointment.appointmentID);
+  };
 
   return (
     <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
@@ -254,7 +289,7 @@ const AppointmentTable = ({
                   typeof appointment.createdAt === 'string'
                     ? appointment.createdAt
                     : appointment.scheduleDate;
-                const isDeleteDisabled = appointment.status === 'approved';
+                const isPrintingReceipt = receiptMutation.isPending;
 
                 return (
                   <tr key={appointment.appointmentID} className="border-t border-gray-100">
@@ -289,14 +324,11 @@ const AppointmentTable = ({
                     <td className="px-3 py-4">
                       <div className="flex justify-end">
                         <button
-                          onClick={() => onDelete(appointment)}
-                          disabled={isDeleting || isDeleteDisabled}
-                          title={
-                            isDeleteDisabled
-                              ? 'Không thể xóa lịch hẹn đã duyệt'
-                              : 'Xóa lịch hẹn'
-                          }
-                          className="flex h-8 w-8 items-center justify-center rounded-full border border-gray-200 text-gray-500 transition hover:border-rose-200 hover:text-rose-600 disabled:cursor-not-allowed disabled:opacity-40"
+                          type="button"
+                          onClick={() => handlePrintReceipt(appointment)}
+                          disabled={isPrintingReceipt}
+                          title="In hóa đơn"
+                          className="flex h-8 w-8 items-center justify-center rounded-full border border-gray-200 text-gray-500 transition hover:border-blue-200 hover:text-blue-600 disabled:cursor-not-allowed disabled:opacity-40"
                         >
                           <svg
                             viewBox="0 0 24 24"
@@ -308,7 +340,7 @@ const AppointmentTable = ({
                             <path
                               strokeLinecap="round"
                               strokeLinejoin="round"
-                              d="M6 7h12M9 7V5h6v2m-7 3v7m4-7v7m4-7v7M7 7l1 12h8l1-12"
+                              d="M6 9V4h12v5M6 18H5a2 2 0 01-2-2v-5a2 2 0 012-2h14a2 2 0 012 2v5a2 2 0 01-2 2h-1M7 14h10v6H7v-6z"
                             />
                           </svg>
                         </button>
@@ -320,6 +352,10 @@ const AppointmentTable = ({
             )}
           </tbody>
         </table>
+      </div>
+
+      <div className="hidden">
+        <ReceiptTemplate ref={receiptRef} data={receiptData} />
       </div>
     </div>
   );

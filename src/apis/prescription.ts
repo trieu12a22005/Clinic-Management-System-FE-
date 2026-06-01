@@ -28,9 +28,8 @@ interface MedicineInfo {
   medicineID: number;
   medicineName: string;
   medicineImage?: string | null;
-  unit: string;
-  price: number;
-  stock: number; // Available stock quantity
+  unit: string | { unitID: number; unitName: string };
+  price: number | string;
   quantity: number; // Total quantity of this medicine in inventory
 }
 
@@ -48,6 +47,7 @@ interface PrescriptionData {
   note?: string | null;
   needReExamine: boolean;
   totalTreatmentDays: number;
+  payAmount?: number | string;
   details: PrescriptionDetail[];
 }
 
@@ -146,7 +146,7 @@ class PrescriptionService {
     request: CreatePrescriptionRequest
   ): Promise<CreatePrescriptionResponse> {
     const response = await apiClient.post<CreatePrescriptionResponse>(
-      "/prescription/new",
+      "/examine/prescription/new",
       request
     );
     return response.data;
@@ -191,7 +191,7 @@ class PrescriptionService {
     request: UpdatePrescriptionRequest
   ): Promise<UpdatePrescriptionResponse> {
     const response = await apiClient.put<UpdatePrescriptionResponse>(
-      `/prescription/${id}`,
+      `/examine/prescription/${id}`,
       request
     );
     return response.data;
@@ -239,7 +239,7 @@ class PrescriptionService {
     request: UpdatePrescriptionDetailsRequest
   ): Promise<UpdateDetailsResponse> {
     const response = await apiClient.put<UpdateDetailsResponse>(
-      `/prescription/${id}/details`,
+      `/examine/prescription/${id}/details`,
       request
     );
     return response.data;
@@ -291,7 +291,7 @@ class PrescriptionService {
    */
   async getPrescription(id: string): Promise<GetPrescriptionResponse> {
     const response = await apiClient.get<GetPrescriptionResponse>(
-      `/prescription/${id}`
+      `/examine/prescription/${id}`
     );
     return response.data;
   }
@@ -319,7 +319,7 @@ class PrescriptionService {
    */
   async deletePrescription(id: string): Promise<DeleteResponse> {
     const response = await apiClient.delete<DeleteResponse>(
-      `/prescription/${id}`
+      `/examine/prescription/${id}`
     );
     return response.data;
   }
