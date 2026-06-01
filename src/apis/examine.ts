@@ -3,7 +3,7 @@ import { apiClient } from "./axios";
 
 class ExamineApi {
     async postExamination(data: PostExamineData) {
-        const response = await apiClient.post('/examine/new', data);
+        const response = await apiClient.post('/examine/summary', data);
         return response.data;
     }
     async getPrescriptionFull(patientID: string) {

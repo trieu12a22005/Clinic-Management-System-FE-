@@ -23,6 +23,7 @@ export type PrescriptionMedicine = {
   medicineId: number;
   medicineName: string;
   usages: UsageItem[];
+  totalTreatmentDays?: number;
 };
 export type PrescriptionPdfMedicine = {
   medicineName: string;
@@ -36,6 +37,7 @@ export type TableRow = {
   medicineName: string;
   totalQuantity: number;
   usagesText: string;
+  totalTreatmentDays?: number;
 };
 
 export type { ColumnsType };

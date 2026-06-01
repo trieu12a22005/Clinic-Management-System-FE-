@@ -19,7 +19,7 @@ const MedicineSection: React.FC<Props> = ({
     queryKey: ['medicineUsages'],
     queryFn: () => medicineApi.getMedicineUsages(),
   });
-  
+
   const dynamicUsageOptions = (usagesResponse?.data || []).map((u) => ({
     label: u.usage,
     value: u.usage,
@@ -34,7 +34,7 @@ const MedicineSection: React.FC<Props> = ({
             name="medicineId"
             labelCol={{ span: 8 }}
             wrapperCol={{ span: 16 }}
-            
+
           >
             <Select
               showSearch
@@ -44,6 +44,16 @@ const MedicineSection: React.FC<Props> = ({
               onSearch={setKeyword}
               allowClear
             />
+          </Form.Item>
+        </Col>
+        <Col span={5}>
+          <Form.Item
+            label="Số ngày điều trị"
+            name="totalTreatmentDays"
+            labelCol={{ span: 10 }}
+            wrapperCol={{ span: 10 }}
+          >
+            <InputNumber min={1} style={{ width: '100%' }} />
           </Form.Item>
         </Col>
       </Row>
@@ -65,7 +75,7 @@ const MedicineSection: React.FC<Props> = ({
                       name={[name, 'timeToTake']}
                       labelCol={{ span: 8 }}
                       wrapperCol={{ span: 16 }}
-                      
+
                     >
                       <Select
                         placeholder="Chọn thời gian dùng"
@@ -94,7 +104,7 @@ const MedicineSection: React.FC<Props> = ({
                       name={[name, 'usage']}
                       labelCol={{ span: 7 }}
                       wrapperCol={{ span: 17 }}
-                      
+
                     >
                       <Select
                         placeholder="Chọn cách dùng"

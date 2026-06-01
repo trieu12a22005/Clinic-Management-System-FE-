@@ -22,7 +22,7 @@ let refreshPromise: Promise<void> | null = null;
 let isHandlingAuthFailure = false;
 
 export const apiClient = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api/v1',
+  baseURL: import.meta.env.VITE_API_BASE_URL || 'https://be-web-garden.vercel.app/api/v1',
   timeout: Number(import.meta.env.VITE_API_TIMEOUT) || 10000,
   headers: {
     'Content-Type': 'application/json',

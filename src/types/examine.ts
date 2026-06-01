@@ -1,12 +1,34 @@
-export interface PostExamineData {
+export interface ExaminePayload {
   enterTicketID: string;
   patientID: string;
   symptoms: string;
   status: string;
-  treatmentPlan: string;
   diagnose: string[];
-  note: string;
+  height?: number;
+  weight?: number;
+  bloodPressure?: string;
+  note?: string;
+  treatmentPlan?: string;
 }
+
+export interface PrescriptionDetailPayload {
+  medicineID: number;
+  usage: string;
+  quantity?: number;
+}
+
+export interface PrescriptionPayload {
+  totalTreatmentDays: number;
+  needReExamine?: boolean;
+  note?: string;
+  details: PrescriptionDetailPayload[];
+}
+
+export interface PostExamineData {
+  examine: ExaminePayload;
+  prescription?: PrescriptionPayload;
+}
+
 export interface ExamineHistoryItem {
   examineLogID: string;
   examinedAt: string;
@@ -16,4 +38,4 @@ export interface ExamineHistoryItem {
   diagnose: string;
   treatmentPlan: string;
   note?: string;
-};
+}
