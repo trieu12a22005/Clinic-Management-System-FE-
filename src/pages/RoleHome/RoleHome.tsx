@@ -119,6 +119,12 @@ const RoleHome = () => {
       path: "/role",
       requiredPermissions: [], // Tạm thời ai cũng thấy, chưa cần phân quyền như user yêu cầu
     },
+    {
+      id: 10,
+      title: "Trang xếp lịch làm việc",
+      description: "Xem và quản lý lịch làm việc của các nhân viên trong phòng khám",
+      path: "/schedule",
+    }
   ];
 
   // Lọc tính năng dựa trên permissions của user (nếu requiredPermissions rỗng thì ai cũng xem được)
