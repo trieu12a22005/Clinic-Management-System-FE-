@@ -3,8 +3,21 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 type Props = {
     data: EnterTicketRow[];
+    roomName?: string;
+    doctorName?: string;
 };
-export default function ListWaitingRoom({ data = [] }: Props) {
+
+const calcAge = (birthDate: string): string => {
+    if (!birthDate) return 'N/A';
+    const birth = new Date(birthDate);
+    if (isNaN(birth.getTime())) return 'N/A';
+    const today = new Date();
+    let age = today.getFullYear() - birth.getFullYear();
+    const m = today.getMonth() - birth.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) age--;
+    return String(age);
+};
+export default function ListWaitingRoom({ data = [], roomName, doctorName }: Props) {
     console.log("props: ", data);
     const [selectedPatientId, setSelectedPatientId] = useState<string>("");
     useEffect(() => {
@@ -22,8 +35,8 @@ export default function ListWaitingRoom({ data = [] }: Props) {
             <div className="mx-auto max-w-[1400px]">
                 <div className="mb-6 flex items-center justify-between">
                     <div>
-                        <h1 className="text-2xl font-bold text-[#1867c0] uppercase">Phòng Khám Nội 1</h1>
-                        <p className="text-gray-600">Bác sĩ phụ trách: Huỳnh Phạm Long Triều</p>
+                        <h1 className="text-2xl font-bold text-[#1867c0] uppercase">{roomName || 'Phòng khám'}</h1>
+                        <p className="text-gray-600">Bác sĩ phụ trách: {doctorName || 'N/A'}</p>
                     </div>
                     <div className="bg-blue-100 text-blue-800 px-4 py-2 rounded-lg font-semibold shadow-sm">
                         Đang chờ: {data.length} bệnh nhân
@@ -61,7 +74,7 @@ export default function ListWaitingRoom({ data = [] }: Props) {
                                                 {patient.fullName}
                                             </h3>
                                             <p className="text-sm text-gray-500 truncate">
-                                                {20} tuổi - {"man"}
+                                                {calcAge(patient.birthDate)} tuổi - {patient.genderDisplay || 'N/A'}
                                             </p>
                                         </div>
                                     </div>
@@ -85,7 +98,7 @@ export default function ListWaitingRoom({ data = [] }: Props) {
                                             <div className="flex gap-4 text-gray-600 mt-1">
                                                 <span><span className="font-semibold">Mã BN:</span> {selectedPatient.DisplayID}</span>
                                                 <span>•</span>
-                                                <span><span className="font-semibold">Tuổi:</span> {20}</span>
+                                                <span><span className="font-semibold">Tuổi:</span> {calcAge(selectedPatient.birthDate)}</span>
                                                 <span>•</span>
                                                 <span><span className="font-semibold">Giới tính:</span> {selectedPatient.genderDisplay}</span>
                                             </div>
@@ -100,7 +113,7 @@ export default function ListWaitingRoom({ data = [] }: Props) {
                                         <div className="grid grid-cols-2 gap-6">
                                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                                 <h3 className="text-sm font-bold text-gray-500 uppercase mb-2">Thông tin liên hệ</h3>
-                                                <p className="text-gray-800">{"0123456789"}</p>
+                                                <p className="text-gray-800">{selectedPatient.phoneNumber || 'N/A'}</p>
                                             </div>
                                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                                 <h3 className="text-sm font-bold text-gray-500 uppercase mb-2">Địa chỉ</h3>

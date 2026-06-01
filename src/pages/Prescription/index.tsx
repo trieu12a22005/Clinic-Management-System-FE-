@@ -64,9 +64,11 @@ const Prescription: React.FC = () => {
   }));
   const handleAddMedicineToList = async () => {
     try {
-      await form.validateFields(['medicineId', 'usages']);
+      await form.validateFields(['medicineId', 'usages', 'totalTreatmentDays']);
       const medicineId = form.getFieldValue('medicineId');
       const usages: UsageItem[] = form.getFieldValue('usages') || [];
+      const totalTreatmentDays = form.getFieldValue('totalTreatmentDays') || 1; // Mặc định là 1 nếu quên nhập
+
       if (!medicineId) {
         toast.error('Vui lòng chọn thuốc');
         return;
@@ -95,11 +97,13 @@ const Prescription: React.FC = () => {
           medicineId: selectedMedicine.medicineID,
           medicineName: selectedMedicine.medicineName,
           usages,
+          totalTreatmentDays, // Lưu lại số ngày dùng cho thuốc này
         },
       ]);
       form.setFieldsValue({
         medicineId: undefined,
         usages: [{}],
+        totalTreatmentDays: undefined, // Reset lại ô số ngày dùng
       });
       setKeyword('');
       toast.success('Đã thêm thuốc vào danh sách');
@@ -111,27 +115,33 @@ const Prescription: React.FC = () => {
   const handleRemoveMedicine = (medicineIndex: number) => {
     setMedicineList((prev) => prev.filter((_, index) => index !== medicineIndex));
   };
-  const tableData: TableRow[] = medicineList.map((item, index) => ({
-    key: index,
-    medicineId: item.medicineId,
-    medicineName: item.medicineName,
-    totalQuantity: item.usages.reduce(
+  const tableData: TableRow[] = medicineList.map((item, index) => {
+    // Tính tổng số lượng của 1 ngày
+    const quantityPerDay = item.usages.reduce(
       (sum, usage) => sum + Number(usage.quantity || 0),
       0
-    ),
-    usagesText: item.usages
-      .map((usage, usageIndex) => {
-        const parts = [
-          usage.timeToTake,
-          usage.quantity ? `${usage.quantity} viên` : '',
-          usage.usage,
-        ].filter(Boolean);
+    );
+    return {
+      key: index,
+      medicineId: item.medicineId,
+      medicineName: item.medicineName,
+      totalTreatmentDays: item.totalTreatmentDays,
+      // Tổng số lượng = (tổng số lượng 1 ngày) * (tổng số ngày dùng)
+      totalQuantity: quantityPerDay * Number(item.totalTreatmentDays || 1),
+      usagesText: item.usages
+        .map((usage, usageIndex) => {
+          const parts = [
+            usage.timeToTake,
+            usage.quantity ? `${usage.quantity} viên` : '',
+            usage.usage,
+          ].filter(Boolean);
 
-        return parts.length ? `${usageIndex + 1}. ${parts.join(' - ')}` : '';
-      })
-      .filter(Boolean)
-      .join('\n'),
-  }));
+          return parts.length ? `${usageIndex + 1}. ${parts.join(' - ')}` : '';
+        })
+        .filter(Boolean)
+        .join('\n'),
+    };
+  });
 
   const columns = getMedicineColumns({
     onRemove: handleRemoveMedicine,
@@ -148,20 +158,53 @@ const Prescription: React.FC = () => {
   const { mutate } = UsePostExamine();
   const { mutate: completeTicket, isPending: isCompleting } = UseCompleteTicket();
 
-  const onFinish = (values: PostExamineData) => {
-    const payload = {
-      ...values,
-      medicines: medicineList,
-    };
+  const onFinish = (values: any) => {
     const examineData: PostExamineData = {
-      enterTicketID: ticket?.ticketID || '',
-      patientID: ticket?.patientID || '',
-      symptoms: payload.symptoms,
-      status: "done",
-      treatmentPlan: payload.treatmentPlan,
-      diagnose: payload.diagnose,
-      note: payload.note,
+      examine: {
+        enterTicketID: ticket?.ticketID || '',
+        patientID: ticket?.patientID || '',
+        symptoms: values.symptoms,
+        status: "done",
+        diagnose: diagnosisList.map((d) => d.diseaseID),
+        height: values.height ? Number(values.height) : undefined,
+        weight: values.weight ? Number(values.weight) : undefined,
+        bloodPressure: values.pressure,
+        note: values.note,
+        treatmentPlan: values.treatmentPlan,
+      },
     };
+
+    if (medicineList.length > 0) {
+      const maxTreatmentDays = Math.max(
+        ...medicineList.map((m) => Number(m.totalTreatmentDays || 1)),
+        1
+      );
+
+      examineData.prescription = {
+        totalTreatmentDays: maxTreatmentDays,
+        needReExamine: false,
+        note: values.note,
+        details: medicineList.map((item) => ({
+          medicineID: item.medicineId,
+          usage: item.usages
+            .map((usage, usageIndex) => {
+              const parts = [
+                usage.timeToTake,
+                usage.quantity ? `${usage.quantity} viên` : '',
+                usage.usage,
+              ].filter(Boolean);
+              return parts.length ? `${usageIndex + 1}. ${parts.join(' - ')}` : '';
+            })
+            .filter(Boolean)
+            .join('; '),
+          quantity: item.usages.reduce(
+            (sum, usage) => sum + Number(usage.quantity || 0),
+            0
+          ) * Number(item.totalTreatmentDays || 1),
+        })),
+      };
+    }
+
     console.log('payload before submit:', examineData);
 
     mutate(examineData, {

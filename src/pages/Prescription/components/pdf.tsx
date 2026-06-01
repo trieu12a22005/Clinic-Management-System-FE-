@@ -48,7 +48,7 @@ export const buildPdfData = ({
     note: values.note || '',
     medicines: medicineList.map((item) => ({
       medicineName: item.medicineName,
-      quantity: getMedicineTotalQuantity(item.usages),
+      quantity: getMedicineTotalQuantity(item.usages) * Number(item.totalTreatmentDays || 0),
       usage: getMedicineUsageText(item.usages),
     })),
   };

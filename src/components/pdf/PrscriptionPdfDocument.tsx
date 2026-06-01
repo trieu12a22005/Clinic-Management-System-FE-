@@ -103,11 +103,13 @@ const PrescriptionPdfDocument: React.FC<Props> = ({ data }) => {
             large
           />
 
-          <BlockField
-            label="Ghi chú"
-            value={data.note || ''}
-            large
-          />
+          {data.note ? (
+            <BlockField
+              label="Ghi chú"
+              value={data.note}
+              large
+            />
+          ) : null}
         </View>
 
         <Text style={styles.medicineTitle}>Danh sách thuốc</Text>
