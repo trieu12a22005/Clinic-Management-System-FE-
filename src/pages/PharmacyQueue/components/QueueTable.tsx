@@ -132,7 +132,7 @@ const QueueTable = ({
                           <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                         </svg>
                       </button>
-                      {item.status === 'pending' && onUpdateStatus && (
+                      {/* {item.status === 'pending' && onUpdateStatus && (
                         <button
                           onClick={() => onUpdateStatus(item.prescriptionDisplayID, 'done')}
                           className="flex h-8 w-8 items-center justify-center rounded-full border border-gray-200 text-gray-500 transition hover:border-emerald-200 hover:text-emerald-600"
@@ -143,7 +143,7 @@ const QueueTable = ({
                             <circle cx="12" cy="12" r="9" />
                           </svg>
                         </button>
-                      )}
+                      )} */}
                     </div>
                   </td>
                 </tr>

@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import type { MedicineTicket } from '@/apis/medicineTicket';
 
 type QueueStatus = 'waiting' | 'dispensed';
@@ -42,10 +43,10 @@ const PharmacyQueue = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['medicine-tickets', today] });
       setPrescriptionInput('');
-      alert('Tạo phiếu thuốc thành công!');
+      toast.success('Tạo phiếu thuốc thành công!');
     },
-    onError: (error: Error) => {
-      alert('Lỗi khi tạo phiếu thuốc: ' + error.message);
+    onError: (error: any) => {
+      toast.error(error?.response?.data?.message || 'Lỗi khi tạo phiếu thuốc.');
     },
   });
 
@@ -86,7 +87,7 @@ const PharmacyQueue = () => {
 
   const handleCreateTicket = () => {
     if (!prescriptionInput.trim()) {
-      alert('Vui lòng nhập mã đơn thuốc');
+      toast.error('Vui lòng nhập mã đơn thuốc');
       return;
     }
     createTicketMutation.mutate(prescriptionInput.trim());
