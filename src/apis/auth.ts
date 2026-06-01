@@ -1,4 +1,4 @@
-import { apiClient, configureAuthInterceptors } from './axios';
+import { apiClient, configureAuthInterceptors } from "./axios";
 
 /**
  * Response type for refresh token operation
@@ -9,28 +9,24 @@ interface RefreshTokenResponse {
 
 class AuthApi {
   async login(data: { email: string; password: string }) {
-    const response = await apiClient.post('/auth/login', data, {
+    const response = await apiClient.post("/auth/login", data, {
       skipAuthRefresh: true,
     });
     return response.data;
   }
 
   async logout() {
-    const response = await apiClient.get('/auth/logout');
+    const response = await apiClient.get("/auth/logout");
     return response.data;
   }
 
   async getProfile() {
-    const response = await apiClient.get('auth/profile');
+    const response = await apiClient.get("auth/profile");
     return response.data;
   }
 
-  async updateProfile(data: {
-    firstName: string;
-    lastName: string;
-    password?: string;
-  }) {
-    const response = await apiClient.put('/auth/update-profile', data);
+  async updateProfile(data: { firstName?: string; lastName?: string; password?: string }) {
+    const response = await apiClient.patch("/auth/update-profile", data);
     return response.data;
   }
 
@@ -52,7 +48,7 @@ class AuthApi {
    */
   async refreshToken(): Promise<RefreshTokenResponse> {
     const response = await apiClient.post<RefreshTokenResponse>(
-      '/auth/refresh',
+      "/auth/refresh",
       {},
       {
         skipAuthRefresh: true,
@@ -67,8 +63,8 @@ const authApi = new AuthApi();
 configureAuthInterceptors({
   refreshAccessToken: () => authApi.refreshToken(),
   onAuthFailure: () => {
-    localStorage.removeItem('user');
-    window.location.replace('/login');
+    localStorage.removeItem("user");
+    window.location.replace("/login");
   },
 });
 
