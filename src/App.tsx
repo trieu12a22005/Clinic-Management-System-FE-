@@ -25,19 +25,24 @@ import EditRolePage from "./pages/Role/EditRole";
 import EditRoleLayout from "./pages/Role/EditRole/Layout";
 import AppointmentPage from "./pages/Appointment";
 import SystemConfig from "./pages/SystemConfig/SystemConfig";
+import OutsideLayout from "./components/layouts/OutsideLayout";
 // import './App.css';
 function App() {
   return (
     <>
       <GlobalLoading />
       <Routes>
-        <Route element={<MainLayout />}>
+        <Route element={<OutsideLayout />}>
           <Route path="/login" element={<Login />} />
+        </Route>
 
+        <Route element={<MainLayout />}>
           <Route element={<ProtectedRoute />}>
             <Route path="/profile" element={<Profile />} />
             {/* <Route index element={<Portfolio />}></Route> */}
-            <Route path="/role_home" index element={<RoleHome />}></Route>
+            {/* Dashboard for internal use only. */}
+            <Route path="/dashboard" index element={<RoleHome />}></Route>
+
             <Route path="/timetable" element={<Timetable />} />
             <Route path="/waiting-room" element={<WaitingRoomPage />} />
             <Route path="/prescription/:id" element={<Prescription />} />
@@ -51,7 +56,7 @@ function App() {
             <Route path="/account" element={<ManageAccount />} />
             <Route path="/report" element={<Report />} />
             <Route path="/system-config" element={<SystemConfig />} />
-          <Route path="/schedule" element={<SchedulePage />} />
+            <Route path="/schedule" element={<SchedulePage />} />
 
             {/* role management */}
             <Route path="/role" element={<RoleLayout />}>

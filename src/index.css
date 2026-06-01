@@ -22,3 +22,6 @@
     padding-bottom: 1cm;
   }
 }
+.wall {
+  background: url("/images/wall.jpeg") center center/cover no-repeat;
+}
