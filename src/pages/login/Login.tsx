@@ -5,6 +5,7 @@ import authApi from "apis/auth";
 import { useMutation } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import { UseAuth } from "@/AuthContext";
+import { url } from "@/utils/url";
 // Định nghĩa schema validation với zod
 const loginSchema = z.object({
   email: z.string().min(1, "Email là bắt buộc").email("Email không đúng định dạng"),
@@ -32,7 +33,7 @@ const Login = () => {
       console.log("setUser", setUser);
       localStorage.setItem("user", JSON.stringify(res.user));
       toast.success("Đăng nhập thành công");
-      window.location.href = "/role_home";
+      window.location.href = url.dashboard;
     },
     onError: (error) => {
       toast.error(error?.message || "Đăng nhập thất bại");
