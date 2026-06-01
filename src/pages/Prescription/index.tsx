@@ -346,6 +346,7 @@ const Prescription: React.FC = () => {
         <Form.Item
           {...fullLayout}
           label="Chẩn đoán"
+          required
         >
           <AutoComplete
             value={diseaseKeyword}
@@ -361,21 +362,13 @@ const Prescription: React.FC = () => {
             placeholder="Tìm kiếm tên bệnh để thêm vào chẩn đoán..."
             allowClear
           />
-        </Form.Item>
-        <Form.Item
-          {...fullLayout}
-          label=" "
-          colon={false}
-          name="diagnose"
-          rules={[{ required: true, message: 'Vui lòng chọn ít nhất một bệnh' }]}
-        >
-          <Input type="hidden" />
-        </Form.Item>
-        <Form.Item
-          {...fullLayout}
-          label=" "
-          colon={false}
-        >
+          <Form.Item
+            name="diagnose"
+            noStyle
+            rules={[{ required: true, message: 'Vui lòng chọn ít nhất một bệnh' }]}
+          >
+            <Input type="hidden" />
+          </Form.Item>
           <div
             style={{
               minHeight: 48,
@@ -418,7 +411,6 @@ const Prescription: React.FC = () => {
           {...fullLayout}
           label="Ghi chú"
           name="note"
-          rules={[{ required: true, message: 'Vui lòng nhập ghi chú' }]}
         >
           <Input.TextArea rows={4} />
         </Form.Item>

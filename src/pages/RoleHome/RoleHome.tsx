@@ -5,8 +5,6 @@ import dayjs from "dayjs";
 import { useNavigate } from "react-router-dom";
 const RoleHome = () => {
   const { user } = UseAuth();
-
-  // Thông báo — lấy từ API
   const { notifications, isLoading: notiLoading } = useNotifications();
   const markRead = useMarkNotificationRead();
 
@@ -65,7 +63,7 @@ const RoleHome = () => {
       id: 2,
       title: "Hồ sơ Bệnh án điện tử - EMR.02",
       description: "Tra cứu lịch sử khám bệnh, kết quả xét nghiệm và thông tin y tế.",
-      path: "/medical-records",
+      path: "/patient-history",
     },
     {
       id: 4,
@@ -153,7 +151,7 @@ const RoleHome = () => {
           />
           <div>
             <h1 className="text-xl text-gray-800 font-semibold">
-              Chào mừng quay trở lại, {user?.role} {user?.firstName + " " + user?.lastName}! 👋
+              Chào mừng quay trở lại, {user?.roleDescription} {user?.firstName + " " + user?.lastName}! 👋
             </h1>
             <p className="text-[#1867c0] text-sm capitalize">{user?.role}</p>
           </div>

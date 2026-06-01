@@ -76,6 +76,7 @@ export interface AppointmentItem {
   appointmentType?: AppointmentType | string;
   patient?: AppointmentPatient;
   room?: AppointmentRoom | null;
+  faculty?: AppointmentFaculty | null;
   approvedByStaff?: AppointmentStaff | null;
   [key: string]: unknown;
 }

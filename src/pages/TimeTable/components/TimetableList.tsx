@@ -1,9 +1,8 @@
-
 import { useMemo, useState } from "react";
 import { useTimetable, useAllTimetable } from "../useTimetable";
 import FacultyService from "@/services/facultyService";
 import FacultyFilter from "./FacultyFilter";
-import { Button, Dropdown } from "antd";
+import { Dropdown } from "antd";
 import { MoreOutlined } from "@ant-design/icons";
 
 export interface WeekDay {
@@ -11,6 +10,7 @@ export interface WeekDay {
     label: string;
     date: string;
 }
+
 const TimetableList = ({ accountID }: { accountID: string }) => {
     const { timetables, isError, error } = useTimetable(accountID);
     const { timetables: allTimetables } = useAllTimetable();
@@ -20,7 +20,7 @@ const TimetableList = ({ accountID }: { accountID: string }) => {
 
     const currentTimetables = activeTab === 'TOÀN BỆNH VIỆN' ? allTimetables : timetables;
 
-    // Group timetables by roomID → mỗi phòng 1 row, không cần API riêng
+    // Group timetables by roomID
     const roomRows = useMemo(() => {
         if (!currentTimetables) return [];
         const map = new Map<string, { roomID: string; roomName: string; facultyName?: string, facultyID?: string | number }>();
@@ -41,6 +41,7 @@ const TimetableList = ({ accountID }: { accountID: string }) => {
         }
         return rows;
     }, [currentTimetables, activeTab, activeFacultyId]);
+
     const tabs: string[] = ['CÁ NHÂN', 'TOÀN BỆNH VIỆN'];
     const weekDays: WeekDay[] = [
         { key: 'mon', label: 'Thứ 2', date: '02-03-2026' },
@@ -51,127 +52,152 @@ const TimetableList = ({ accountID }: { accountID: string }) => {
         { key: 'sat', label: 'Thứ 7', date: '07-03-2026' },
         { key: 'sun', label: 'Chủ nhật', date: '08-03-2026' },
     ];
-    if (isError) return <div className="text-red-500">❌ Lỗi: {error?.message}</div>;
+
+    if (isError) return <div className="text-red-500 font-semibold text-center mt-10">❌ Lỗi: {error?.message}</div>;
+
     return (
-        <div className="min-h-screen bg-gray-50 p-6 font-sans">
-            <div className="mx-auto max-w-[1400px] bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-                <div className="text-center mb-6">
-                    <h1 className="text-3xl font-bold text-[#1867c0] mb-2 uppercase">Lịch làm việc</h1>
-                    <div className="text-[#1867c0] text-sm font-medium flex justify-center items-center gap-2">
-                        <button className="hover:underline">&lt;&lt; Tuần trước đó</button>
-                        <span className="text-gray-400">|</span>
-                        <button className="hover:underline font-bold text-gray-800">Tuần hiện tại</button>
-                        <span className="text-gray-400">|</span>
-                        <button className="hover:underline">Tuần kế tiếp &gt;&gt;</button>
+        <div className="min-h-screen bg-slate-50 p-4 sm:p-8 font-sans">
+            <div className="mx-auto max-w-[1440px] bg-white p-6 sm:p-10 rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-100">
+                {/* Header */}
+                <div className="flex flex-col items-center mb-10">
+                    <h1 className="text-3xl sm:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 mb-6 tracking-tight uppercase">
+                        Lịch Làm Việc
+                    </h1>
+                    <div className="flex items-center gap-4 bg-slate-100/80 px-6 py-2.5 rounded-full shadow-inner border border-slate-200/60 backdrop-blur-sm">
+                        <button className="text-slate-500 hover:text-indigo-600 transition-colors font-medium text-sm flex items-center gap-1">
+                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+                            <span className="hidden sm:inline">Tuần trước</span>
+                        </button>
+                        <div className="w-px h-5 bg-slate-300"></div>
+                        <button className="text-indigo-700 font-bold hover:text-indigo-800 transition-colors text-sm sm:text-base">Tuần hiện tại</button>
+                        <div className="w-px h-5 bg-slate-300"></div>
+                        <button className="text-slate-500 hover:text-indigo-600 transition-colors font-medium text-sm flex items-center gap-1">
+                            <span className="hidden sm:inline">Tuần tiếp</span>
+                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+                        </button>
                     </div>
                 </div>
-                {activeTab === 'TOÀN BỆNH VIỆN' ? (
+
+                {/* Tabs */}
+                <div className="flex justify-center mb-8">
+                    <div className="inline-flex bg-slate-100 p-1.5 rounded-full shadow-inner border border-slate-200/50">
+                        {tabs.map((tab) => (
+                            <button
+                                key={tab}
+                                onClick={() => setActiveTab(tab)}
+                                className={`px-6 sm:px-10 py-2.5 rounded-full text-sm font-bold transition-all duration-300 ease-out ${
+                                    activeTab === tab
+                                        ? 'bg-white text-indigo-600 shadow-md transform scale-105'
+                                        : 'text-slate-500 hover:text-indigo-500 hover:bg-slate-200/50'
+                                }`}
+                            >
+                                LỊCH {tab}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+
+                {/* Faculty Filter */}
+                <div className={`transition-all duration-500 overflow-hidden ${activeTab === 'TOÀN BỆNH VIỆN' ? 'max-h-32 mb-8 opacity-100' : 'max-h-0 opacity-0'}`}>
                     <FacultyFilter
                         faculties={faculties}
                         activeFacultyId={activeFacultyId}
                         onSelectFaculty={setActiveFacultyId}
                     />
-
-                ) : (
-                    <div className="h-[40px] mb-8"></div>
-                )}
-                <div className="flex justify-center mb-8 flex-wrap gap-1">
-                    {tabs.map((tab) => (
-                        <button
-                            key={tab}
-                            onClick={() => setActiveTab(tab)}
-                            className={`px-8 py-2.5 cursor-pointer text-sm font-bold rounded transition-colors ${activeTab === tab
-                                ? 'bg-[#E6E6FA] text-black border border-[#6495ED]'
-                                : 'bg-[#6495ED] text-white hover:bg-blue-600'
-                                }`}
-                        >
-                            LỊCH {tab}
-                        </button>
-                    ))}
                 </div>
 
-                <div className="overflow-x-auto">
-                    <table className="w-full min-w-[1200px] border-collapse border border-gray-300 text-sm text-center">
-                        <thead>
-                            <tr className="bg-gray-50 text-gray-800">
-                                <th className="border border-gray-300 p-2 w-[120px]">Phòng khám</th>
-                                {weekDays.map((day) => (
-
-                                    <th
-                                        key={day.key}
-                                        className="relative border border-gray-300 p-2 pr-8 w-[12%]"
-                                    >
-                                        {day.label}
-                                        <br />
-                                        <span className="font-normal text-xs">({day.date})</span>
-
-                                        <div className="absolute right-1 top-1">
-                                            <Dropdown
-                                                menu={{
-                                                    items: [
-                                                        { key: "edit", label: "Sửa" },
-                                                        { key: "delete", label: "Xóa" },
-                                                        { key: "detail", label: "Chi tiết" },
-                                                    ],
-                                                    onClick: ({ key }) => {
-                                                        console.log(key, day);
-                                                    },
-                                                }}
-                                                trigger={["click"]}
-                                                placement="bottomRight"
-                                            >
-                                                <Button
-                                                    type="text"
-                                                    icon={<MoreOutlined />}
-                                                    onClick={(e) => e.preventDefault()}
-                                                />
-                                            </Dropdown>
-                                        </div>
+                {/* Table Area */}
+                <div className="rounded-2xl border border-slate-200 overflow-hidden shadow-sm bg-white">
+                    <div className="overflow-x-auto">
+                        <table className="w-full min-w-[1200px] border-collapse text-sm text-left">
+                            <thead>
+                                <tr className="bg-slate-50 border-b border-slate-200">
+                                    <th className="p-4 font-bold text-slate-700 uppercase tracking-wider w-[140px] text-center border-r border-slate-200">
+                                        Phòng Khám
                                     </th>
-
-                                ))}
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {roomRows.length === 0 ? (
-                                <tr>
-                                    <td colSpan={8} className="border border-gray-300 text-center p-8 text-gray-400">
-                                        Không có lịch làm việc trong tuần này
-                                    </td>
+                                    {weekDays.map((day) => (
+                                        <th key={day.key} className="relative p-4 border-r border-slate-200 last:border-r-0 w-[12%] text-center group">
+                                            <div className="font-extrabold text-slate-700 uppercase tracking-wide">{day.label}</div>
+                                            <div className="text-xs font-medium text-slate-400 mt-1">{day.date}</div>
+                                            
+                                            {/* Minimal Dropdown trigger on hover */}
+                                            <div className="absolute right-2 top-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <Dropdown
+                                                    menu={{
+                                                        items: [
+                                                            { key: "edit", label: "Sửa lịch" },
+                                                            { key: "delete", label: <span className="text-red-500">Xóa lịch</span> },
+                                                        ]
+                                                    }}
+                                                    trigger={["click"]}
+                                                    placement="bottomRight"
+                                                >
+                                                    <button className="p-1 rounded-md text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 transition-colors">
+                                                        <MoreOutlined className="text-lg" />
+                                                    </button>
+                                                </Dropdown>
+                                            </div>
+                                        </th>
+                                    ))}
                                 </tr>
-                            ) : (
-                                roomRows.map((room) => (
-                                    <tr key={room.roomID} className="h-[200px]">
-                                        <td className="border border-gray-300 font-bold p-2 align-middle">
-                                            <div className="text-lg">{room.roomName}</div>
-                                            <div className="text-xs font-normal mt-2 text-gray-500">{room.facultyName}</div>
+                            </thead>
+                            <tbody className="divide-y divide-slate-200">
+                                {roomRows.length === 0 ? (
+                                    <tr>
+                                        <td colSpan={8} className="p-12 text-center text-slate-400 font-medium">
+                                            <div className="flex flex-col items-center gap-3">
+                                                <svg className="w-12 h-12 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                                                Không có lịch làm việc nào được phân công.
+                                            </div>
                                         </td>
-                                        {weekDays.map((day) => {
-                                            const entry = currentTimetables?.find(
-                                                (t) => t.roomID === room.roomID && t.dayOfWeek === day.key
-                                            );
-                                            if (entry) {
-                                                return (
-                                                    <td key={day.key} className="border border-gray-300 p-3 align-top text-left transition-colors cursor-pointer">
-                                                        <div className="font-bold text-left mt-[20px] text-[#6495ED]">
-                                                            {entry.note}
-                                                        </div>
-                                                        <hr className="my-1 border-gray-300" />
-                                                        <div className="text-xs">
-                                                            <p className="font-bold text-left font-semibold mt-[10px]">
-                                                                <span>BS: </span>{entry.account.firstName} {entry.account.lastName}
-                                                            </p>
-                                                        </div>
-                                                    </td>
-                                                );
-                                            }
-                                            return <td key={day.key} className="border border-gray-300 p-3"></td>;
-                                        })}
                                     </tr>
-                                ))
-                            )}
-                        </tbody>
-                    </table>
+                                ) : (
+                                    roomRows.map((room) => (
+                                        <tr key={room.roomID} className="group/row hover:bg-slate-50/50 transition-colors">
+                                            <td className="p-4 border-r border-slate-200 align-middle text-center bg-slate-50/40 group-hover/row:bg-slate-100/50 transition-colors">
+                                                <div className="text-lg font-extrabold text-slate-800">{room.roomName}</div>
+                                                {room.facultyName && (
+                                                    <div className="mt-2 inline-flex px-2.5 py-1 bg-slate-200/60 text-slate-600 text-[11px] font-bold uppercase rounded-full tracking-wide">
+                                                        {room.facultyName}
+                                                    </div>
+                                                )}
+                                            </td>
+                                            {weekDays.map((day) => {
+                                                const entry = currentTimetables?.find(
+                                                    (t) => t.roomID === room.roomID && t.dayOfWeek === day.key
+                                                );
+                                                if (entry) {
+                                                    return (
+                                                        <td key={day.key} className="p-3 border-r border-slate-200 last:border-r-0 align-top bg-white">
+                                                            <div className="h-full min-h-[140px] bg-gradient-to-br from-blue-50 to-indigo-50/50 rounded-xl p-4 border border-indigo-100/60 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 cursor-pointer flex flex-col group/card">
+                                                                <div className="flex-1">
+                                                                    <div className="inline-flex items-center justify-center px-2.5 py-1 bg-indigo-100/80 text-indigo-700 text-[11px] font-extrabold uppercase tracking-wide rounded-md mb-3 border border-indigo-200/50">
+                                                                        {entry.note || 'Ca Khám'}
+                                                                    </div>
+                                                                </div>
+                                                                <div className="mt-auto pt-3 border-t border-indigo-100/80 flex items-center gap-2">
+                                                                    <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-indigo-500 to-blue-500 text-white flex items-center justify-center text-xs font-bold shadow-sm shrink-0">
+                                                                        {entry.account.firstName?.charAt(0).toUpperCase() || 'BS'}
+                                                                    </div>
+                                                                    <div className="flex flex-col overflow-hidden">
+                                                                        <span className="text-[10px] text-slate-500 font-bold uppercase">Bác sĩ</span>
+                                                                        <span className="text-sm font-semibold text-slate-800 truncate group-hover/card:text-indigo-700 transition-colors">
+                                                                            {entry.account.firstName} {entry.account.lastName}
+                                                                        </span>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                    );
+                                                }
+                                                return <td key={day.key} className="p-3 border-r border-slate-200 last:border-r-0 bg-slate-50/30"></td>;
+                                            })}
+                                        </tr>
+                                    ))
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>

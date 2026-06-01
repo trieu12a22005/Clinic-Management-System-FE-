@@ -18,6 +18,8 @@ export interface BM1Response {
 // BM3 - Danh Sách Bệnh Nhân
 export interface BM3Item {
     stt: number;
+    patientId: string;
+    examineLogId: string;
     fullName: string;
     date: string;
     diseaseType: string;

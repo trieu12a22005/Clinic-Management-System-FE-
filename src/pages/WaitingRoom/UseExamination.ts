@@ -10,7 +10,8 @@ export const UseExamination = (params: EnterTicketParams) => {
             const res = await ticketApi.getTicket(params);
             return mapEnterTicketRows(res.data);
         },
-        enabled: !!params.roomID
+        enabled: !!params.roomID,
+        staleTime: 0, // Ghi đè cấu hình 5 phút của global để luôn lấy dữ liệu mới nhất
     });
     return {
         examinations: query.data,

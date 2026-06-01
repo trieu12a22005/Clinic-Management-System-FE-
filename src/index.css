@@ -11,3 +11,14 @@
     @apply text-4xl font-bold;
   }
 }
+
+@media print {
+  @page {
+    margin-top: 0;
+    margin-bottom: 0;
+  }
+  body {
+    padding-top: 1cm;
+    padding-bottom: 1cm;
+  }
+}

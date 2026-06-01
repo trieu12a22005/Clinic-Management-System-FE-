@@ -51,7 +51,7 @@ const Header: React.FC = () => {
   };
 
   return (
-    <header className="text-white font-bold shadow-md">
+    <header className="text-white font-bold shadow-md print:hidden">
       <div className="w-full px-6 flex items-center justify-between h-16">
         {/* Logo bên trái */}
         <Link to="/role_home" className="flex items-center gap-2">
