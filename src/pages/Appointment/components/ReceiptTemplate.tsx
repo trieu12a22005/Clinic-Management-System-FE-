@@ -127,7 +127,7 @@ const ReceiptTemplate = React.forwardRef<HTMLDivElement, ReceiptTemplateProps>(
               {new Date().getFullYear()}
             </p>
             <p className="font-semibold">Người lập phiếu</p>
-            <p className="mt-16 not-italic font-semibold">Thu ngân</p>
+            <p className="mt-16 not-italic font-semibold">Nhà thuốc Quốc Tế</p>
           </div>
         </div>
       </div>

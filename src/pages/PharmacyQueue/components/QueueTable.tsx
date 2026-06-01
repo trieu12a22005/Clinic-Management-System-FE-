@@ -1,4 +1,10 @@
+import { useEffect, useRef, useState } from 'react';
+import { useMutation } from '@tanstack/react-query';
+import { useReactToPrint } from 'react-to-print';
+import toast from 'react-hot-toast';
 import type { MedicineTicket } from '@/apis/medicineTicket';
+import receiptApi, { type ReceiptData } from '@/apis/receipt';
+import PharmacyReceiptTemplate from './PharmacyReceiptTemplate';
 
 type TicketStatus = 'pending' | 'done';
 type DisplayStatus = 'waiting' | 'dispensed';
@@ -37,6 +43,40 @@ const QueueTable = ({
   onStatusFilterChange,
   onViewPrescription,
 }: QueueTableProps) => {
+  const receiptRef = useRef<HTMLDivElement>(null);
+  const [receiptData, setReceiptData] = useState<ReceiptData | null>(null);
+  const [shouldPrint, setShouldPrint] = useState(false);
+
+  const handlePrint = useReactToPrint({
+    contentRef: receiptRef,
+    documentTitle: receiptData
+      ? `Hoa-don-${receiptData.appointmentDisplayID}`
+      : 'Hoa-don-thanh-toan',
+  });
+
+  const receiptMutation = useMutation({
+    mutationFn: (prescriptionID: string) => receiptApi.getReceiptByPrescriptionID(prescriptionID),
+    onSuccess: (response) => {
+      setReceiptData(response.data);
+      setShouldPrint(true);
+    },
+    onError: (error) => {
+      toast.error(
+        error instanceof Error ? error.message : 'Không thể tải hóa đơn thanh toán'
+      );
+    },
+  });
+
+  useEffect(() => {
+    if (!shouldPrint || !receiptData) return;
+    handlePrint();
+    setShouldPrint(false);
+  }, [handlePrint, receiptData, shouldPrint]);
+
+  const handlePrintReceipt = (prescriptionID: string) => {
+    receiptMutation.mutate(prescriptionID);
+  };
+
   return (
     <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
       <div className="flex flex-col gap-4 border-b border-gray-100 pb-4 md:flex-row md:items-center md:justify-between">
@@ -117,6 +157,23 @@ const QueueTable = ({
                   </td>
                   <td className="px-3 py-4">
                     <div className="flex justify-end gap-2">
+                      {item.status === 'done' && (
+                        <button
+                          type="button"
+                          onClick={() => handlePrintReceipt(item.prescriptionID)}
+                          disabled={receiptMutation.isPending}
+                          className="flex h-8 w-8 items-center justify-center rounded-full border border-gray-200 text-gray-500 transition hover:border-blue-200 hover:text-blue-600 disabled:cursor-not-allowed disabled:opacity-40"
+                          title="In hóa đơn"
+                        >
+                          <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2}>
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              d="M6 9V4h12v5M6 18H5a2 2 0 01-2-2v-5a2 2 0 012-2h14a2 2 0 012 2v5a2 2 0 01-2 2h-1M7 14h10v6H7v-6z"
+                            />
+                          </svg>
+                        </button>
+                      )}
                       <button
                         onClick={() => onViewPrescription(item.prescriptionID, item.ticketID)}
                         className="flex h-8 w-8 items-center justify-center rounded-full border border-gray-200 text-gray-500 transition hover:border-blue-200 hover:text-blue-600"
@@ -131,18 +188,6 @@ const QueueTable = ({
                           <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                         </svg>
                       </button>
-                      {/* {item.status === 'pending' && onUpdateStatus && (
-                        <button
-                          onClick={() => onUpdateStatus(item.prescriptionDisplayID, 'done')}
-                          className="flex h-8 w-8 items-center justify-center rounded-full border border-gray-200 text-gray-500 transition hover:border-emerald-200 hover:text-emerald-600"
-                          title="Đánh dấu đã phát"
-                        >
-                          <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4" />
-                            <circle cx="12" cy="12" r="9" />
-                          </svg>
-                        </button>
-                      )} */}
                     </div>
                   </td>
                 </tr>
@@ -150,6 +195,10 @@ const QueueTable = ({
             })}
           </tbody>
         </table>
+      </div>
+
+      <div className="hidden">
+        <PharmacyReceiptTemplate ref={receiptRef} data={receiptData} />
       </div>
     </div>
   );

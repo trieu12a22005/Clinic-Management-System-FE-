@@ -6,6 +6,15 @@ export interface PrescriptionSummary {
   payAmount: number;
 }
 
+export interface ReceiptMedicine {
+  medicineID: number;
+  medicineName: string;
+  description: string | null;
+  price: number;
+  quantity: number;
+  unitName: string;
+}
+
 export interface ReceiptData {
   appointmentID: string;
   appointmentDisplayID: string;
@@ -16,6 +25,7 @@ export interface ReceiptData {
   prescriptionFee: number | null;
   totalFee: number;
   prescriptions: PrescriptionSummary[];
+  medicines?: ReceiptMedicine[];
 }
 
 export interface GetReceiptResponse {
@@ -27,6 +37,13 @@ class ReceiptApi {
   async getReceipt(appointmentID: string): Promise<GetReceiptResponse> {
     const response = await apiClient.get<GetReceiptResponse>(
       `/receipt/${appointmentID}`
+    );
+    return response.data;
+  }
+
+  async getReceiptByPrescriptionID(prescriptionID: string): Promise<GetReceiptResponse> {
+    const response = await apiClient.get<GetReceiptResponse>(
+      `/receipt/prescription/${prescriptionID}`
     );
     return response.data;
   }
