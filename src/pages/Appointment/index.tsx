@@ -10,7 +10,6 @@ import facultyApi from '@/apis/faculty';
 import type { Faculty } from '@/types/facultyType';
 import AppointmentTable from './components/AppointmentTable';
 import CreateAppointmentModal from './components/CreateAppointmentModal';
-import DeleteAppointmentModal from './components/DeleteAppointmentModal';
 
 type StatusFilter = 'all' | AppointmentStatus;
 
@@ -35,9 +34,6 @@ const AppointmentPage = () => {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [selectedDate, setSelectedDate] = useState(() => getTodayDateString());
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [selectedAppointmentToDelete, setSelectedAppointmentToDelete] =
-    useState<AppointmentItem | null>(null);
-
   const {
     data: appointmentsResponse,
     isLoading: isAppointmentsLoading,
@@ -122,40 +118,6 @@ const AppointmentPage = () => {
     },
   });
 
-  const deleteAppointmentMutation = useMutation({
-    mutationFn: (appointmentID: string) =>
-      appointmentApi.deleteAppointmentById(appointmentID),
-    onSuccess: (response) => {
-      queryClient.invalidateQueries({ queryKey: ['appointments'] });
-      setSelectedAppointmentToDelete(null);
-      toast.success(response.message ?? 'Xóa lịch hẹn thành công');
-    },
-    onError: (error) => {
-      toast.error(
-        error instanceof Error ? error.message : 'Xóa lịch hẹn thất bại'
-      );
-    },
-  });
-
-  const handleDelete = (appointment: AppointmentItem) => {
-    setSelectedAppointmentToDelete(appointment);
-  };
-
-  const handleCloseDeleteModal = () => {
-    if (deleteAppointmentMutation.isPending) {
-      return;
-    }
-    setSelectedAppointmentToDelete(null);
-  };
-
-  const handleConfirmDelete = () => {
-    if (!selectedAppointmentToDelete) {
-      return;
-    }
-
-    deleteAppointmentMutation.mutate(selectedAppointmentToDelete.appointmentID);
-  };
-
   const handleSelectedDateChange = (value: string) => {
     setSelectedDate(value || getTodayDateString());
   };
@@ -205,8 +167,6 @@ const AppointmentPage = () => {
             onResetToToday={handleResetToToday}
             statusFilter={statusFilter}
             onStatusFilterChange={setStatusFilter}
-            onDelete={handleDelete}
-            isDeleting={deleteAppointmentMutation.isPending}
           />
         )}
       </div>
@@ -219,13 +179,6 @@ const AppointmentPage = () => {
         onSubmit={(payload) => createAppointmentMutation.mutate(payload)}
       />
 
-      <DeleteAppointmentModal
-        open={selectedAppointmentToDelete !== null}
-        appointment={selectedAppointmentToDelete}
-        isPending={deleteAppointmentMutation.isPending}
-        onClose={handleCloseDeleteModal}
-        onConfirm={handleConfirmDelete}
-      />
     </div>
   );
 };
