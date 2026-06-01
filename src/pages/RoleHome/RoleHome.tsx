@@ -3,6 +3,7 @@ import { useNotifications, useMarkNotificationRead } from "./useRoleHome";
 import { Avatar, Calendar, Collapse, Spin, theme } from "antd";
 import dayjs from "dayjs";
 import { useNavigate } from "react-router-dom";
+import { useCheckPermission } from "@/hooks/useCheckPermission";
 const RoleHome = () => {
   const { user } = UseAuth();
   const { notifications, isLoading: notiLoading } = useNotifications();
@@ -52,24 +53,27 @@ const RoleHome = () => {
   }));
 
   // 3. Danh sách chức năng
-  const systemFeatures = [
+  const allSystemFeatures = [
     {
       id: 1,
       title: "Quản lý Lịch làm việc - SCH.01",
       description: "Hỗ trợ lên lịch hẹn, theo dõi ca trực và sắp xếp phòng khám.",
       path: "/timetable",
+      requiredPermissions: ["timetable.view", "timetable.view_all"],
     },
     {
       id: 2,
       title: "Hồ sơ Bệnh án điện tử - EMR.02",
       description: "Tra cứu lịch sử khám bệnh, kết quả xét nghiệm và thông tin y tế.",
       path: "/patient-history",
+      requiredPermissions: ["appointment.view", "ticket.view_all"],
     },
     {
       id: 4,
       title: "Quản lý hàng đợi phát thuốc - PHA.01",
       description: "Theo dõi hàng đợi, xem đơn thuốc và xác nhận phát thuốc cho bệnh nhân.",
       path: "/pharmacy-queue",
+      requiredPermissions: ["medicine_ticket.view_all"],
     },
     {
       id: 5,
@@ -77,32 +81,51 @@ const RoleHome = () => {
       description: "Tra cứu tồn kho, kiểm tra hạn sử dụng và cảnh báo thuốc sắp hết.",
       access: "Dược sĩ, Quản lý",
       path: "/pharmacy-inventory",
+      // Đã chuyển sang dùng quyền UI chuyên biệt: "menu.pharmacy_inventory"
+      requiredPermissions: ["menu.pharmacy_inventory"], 
     },
     {
       id: 6,
       title: "Phiếu khám bệnh",
       description: "ghi kết quả khám bệnh, chẩn đoán và kế hoạch điều trị cho bệnh nhân",
       path: "/waiting-room",
+      requiredPermissions: ["ticket.view_all", "ticket.view_next"],
     },
     {
       id: 7,
       title: "Quản lý thông báo",
       description: "Quản lý thông báo",
       path: "/notification",
+      requiredPermissions: ["notification.manage"], 
     },
     {
       id: 8,
       title: "Quản lý tài khoản",
       description: "Quản lý tài khoản",
       path: "/account",
+      requiredPermissions: ["account.view", "account.create"],
     },
     {
       id: 9,
       title: "Quản lý lịch hẹn khám bệnh",
       description: "Xem lịch hẹn khám bệnh của bệnh nhân, xác nhận hoặc hủy lịch hẹn",
       path: "/appointment",
+      requiredPermissions: ["appointment.view"],
+    },
+    {
+      id: 10,
+      title: "Quản lý Phân quyền",
+      description: "Xem, tạo, chỉnh sửa và gán vai trò; quản lý quyền truy cập hệ thống.",
+      path: "/role",
+      requiredPermissions: [], // Tạm thời ai cũng thấy, chưa cần phân quyền như user yêu cầu
     },
   ];
+
+  // Lọc tính năng dựa trên permissions của user (nếu requiredPermissions rỗng thì ai cũng xem được)
+  const { hasPermission } = useCheckPermission();
+  const systemFeatures = allSystemFeatures.filter((feature) => {
+    return hasPermission(feature.requiredPermissions);
+  });
 
   // Token cho Calendar Ant Design
   const { token } = theme.useToken();

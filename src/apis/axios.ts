@@ -1,4 +1,5 @@
 import axios, { AxiosError } from 'axios';
+import { toast } from 'react-hot-toast';
 
 declare module 'axios' {
   interface AxiosRequestConfig<D = any> {
@@ -68,11 +69,20 @@ const refreshAccessToken = async () => {
   return refreshPromise;
 };
 
+
+
 apiClient.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
     const originalRequest = error.config;
     const status = error.response?.status;
+    const data = error.response?.data as any;
+
+    if (status === 403) {
+      const errorMessage = data?.error || data?.message || 'Bạn không có quyền thực hiện thao tác này';
+      toast.error(errorMessage, { duration: 4000 });
+      return Promise.reject(error);
+    }
 
     if (!originalRequest || status !== 401) {
       return Promise.reject(error);
