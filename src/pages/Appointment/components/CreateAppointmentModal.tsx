@@ -12,6 +12,8 @@ type AppointmentFormValues = {
   lastName: string;
   phoneNumber: string;
   email: string;
+  birthDate: string;
+  address: string;
   appointmentType: AppointmentType;
   facultyID: string;
   roomID: string;
@@ -32,6 +34,8 @@ const initialValues: AppointmentFormValues = {
   lastName: '',
   phoneNumber: '',
   email: '',
+  birthDate: '',
+  address: '',
   appointmentType: 'examine',
   facultyID: '',
   roomID: '',
@@ -151,6 +155,8 @@ const CreateAppointmentModal = ({
       lastName: values.lastName.trim(),
       phoneNumber: values.phoneNumber.trim(),
       email: values.email.trim() || undefined,
+      birthDate: values.birthDate.trim() || undefined,
+      address: values.address.trim() || undefined,
       appointmentType: values.appointmentType,
       facultyID: values.facultyID,
       roomID: values.roomID,
@@ -232,6 +238,26 @@ const CreateAppointmentModal = ({
               className="w-full rounded-lg border border-gray-200 px-3 py-2.5 text-sm text-gray-700 focus:border-blue-500 focus:outline-none"
             />
             {renderError('email')}
+          </div>
+
+          <div>
+            <label className="mb-2 block text-sm font-medium text-gray-700">Ngày sinh</label>
+            <input
+              type="date"
+              value={values.birthDate}
+              onChange={(event) => setFieldValue('birthDate', event.target.value)}
+              className="w-full rounded-lg border border-gray-200 px-3 py-2.5 text-sm text-gray-700 focus:border-blue-500 focus:outline-none"
+            />
+          </div>
+
+          <div className="md:col-span-2">
+            <label className="mb-2 block text-sm font-medium text-gray-700">Địa chỉ</label>
+            <input
+              value={values.address}
+              onChange={(event) => setFieldValue('address', event.target.value)}
+              placeholder="123 Nguyễn Văn Linh, Quận 7, TP.HCM"
+              className="w-full rounded-lg border border-gray-200 px-3 py-2.5 text-sm text-gray-700 focus:border-blue-500 focus:outline-none"
+            />
           </div>
 
           <div>

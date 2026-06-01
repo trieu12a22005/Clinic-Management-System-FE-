@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { DatePicker, Table, Spin, Alert, Button, Tooltip, Input, Modal, Descriptions, Tag, Divider } from "antd";
-import { EyeOutlined, SearchOutlined } from "@ant-design/icons";
+import { EyeOutlined } from "@ant-design/icons";
 import { useQuery } from "@tanstack/react-query";
 import dayjs, { type Dayjs } from "dayjs";
 import reportApi from "@/apis/report";
@@ -47,10 +47,10 @@ const PatientLookup = () => {
             align: "center" as const,
             render: (_: any, record: BM3Item) => (
                 <Tooltip title="Xem Bệnh Án">
-                    <Button 
-                        type="primary" 
-                        icon={<EyeOutlined />} 
-                        onClick={() => setViewRecordId(record.examineLogId)} 
+                    <Button
+                        type="primary"
+                        icon={<EyeOutlined />}
+                        onClick={() => setViewRecordId(record.examineLogId)}
                         size="small"
                         className="bg-indigo-500 border-none hover:bg-indigo-600"
                     />
@@ -156,8 +156,8 @@ const PatientLookup = () => {
                             </Descriptions.Item>
                             <Descriptions.Item label="Hướng điều trị" span={2}>{recordData.treatmentPlan || "Không có"}</Descriptions.Item>
                             <Descriptions.Item label="Chỉ số cơ thể" span={2}>
-                                Chiều cao: {recordData.height ? `${recordData.height} cm` : "--"} | 
-                                Cân nặng: {recordData.weight ? `${recordData.weight} kg` : "--"} | 
+                                Chiều cao: {recordData.height ? `${recordData.height} cm` : "--"} |
+                                Cân nặng: {recordData.weight ? `${recordData.weight} kg` : "--"} |
                                 Nhóm máu: {recordData.blood ? recordData.blood.toUpperCase() : "--"}
                             </Descriptions.Item>
                             <Descriptions.Item label="Ghi chú bác sĩ" span={2}>{recordData.note || "Không có"}</Descriptions.Item>
@@ -168,7 +168,7 @@ const PatientLookup = () => {
                                 <Divider orientation="left" plain><span className="font-semibold text-lg text-gray-700">Đơn thuốc chỉ định</span></Divider>
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                     <p className="mb-3 text-sm"><strong>Số ngày điều trị:</strong> {recordData.prescription.totalTreatmentDays} ngày</p>
-                                    <Table 
+                                    <Table
                                         dataSource={recordData.prescription.details || []}
                                         pagination={false}
                                         size="small"

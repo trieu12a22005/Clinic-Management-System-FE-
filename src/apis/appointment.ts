@@ -105,6 +105,8 @@ export interface CreateAppointmentPayload {
   lastName: string;
   phoneNumber: string;
   email?: string;
+  birthDate?: string;
+  address?: string;
   appointmentType?: AppointmentType;
   scheduleDate: string;
   roomID?: string;
