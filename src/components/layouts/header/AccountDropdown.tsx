@@ -2,12 +2,15 @@ import { Avatar, Button, Dropdown, Space } from "antd";
 import type { MenuProps } from "antd";
 import { Link, useNavigate } from "react-router-dom";
 import { DownOutlined, LogoutOutlined, UserOutlined } from "@ant-design/icons";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import authApi from "@/apis/auth";
 import toast from "react-hot-toast";
-import { UseAuth } from "@/AuthContext";
+import { useProfile } from "@/hooks/useProfile";
+import { query } from "@/lib/queryClient";
+// import { UseAuth } from "@/AuthContext";
 function AccountDropdownComponent() {
-  const { user } = UseAuth();
+  const { data: user } = useProfile(); // UseAuth();
+  const queryClient = useQueryClient();
   const currentName = user ? `${user.firstName} ${user.lastName}` : "";
   const avatarUrl = user?.avatar;
   const mutation = useMutation({
@@ -15,6 +18,9 @@ function AccountDropdownComponent() {
     onSuccess: () => {
       toast.success("Đăng xuất thành công");
       localStorage.removeItem("user");
+      queryClient.removeQueries({
+        queryKey: query.profile,
+      });
       window.location.href = "/login";
     },
     onError: (error) => {

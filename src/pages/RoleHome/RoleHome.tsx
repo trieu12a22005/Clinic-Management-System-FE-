@@ -1,11 +1,12 @@
-import { UseAuth } from "@/AuthContext";
+// import { UseAuth } from "@/AuthContext";
 import { useNotifications, useMarkNotificationRead } from "./useRoleHome";
 import { Avatar, Calendar, Collapse, Spin, theme } from "antd";
 import dayjs from "dayjs";
 import { useNavigate } from "react-router-dom";
 import { useCheckPermission } from "@/hooks/useCheckPermission";
+import { useProfile } from "@/hooks/useProfile";
 const RoleHome = () => {
-  const { user } = UseAuth();
+  const { data: user } = useProfile();
   const { notifications, isLoading: notiLoading } = useNotifications();
   const markRead = useMarkNotificationRead();
 
@@ -82,7 +83,7 @@ const RoleHome = () => {
       access: "Dược sĩ, Quản lý",
       path: "/pharmacy-inventory",
       // Đã chuyển sang dùng quyền UI chuyên biệt: "menu.pharmacy_inventory"
-      requiredPermissions: ["menu.pharmacy_inventory"], 
+      requiredPermissions: ["menu.pharmacy_inventory"],
     },
     {
       id: 6,
@@ -96,7 +97,7 @@ const RoleHome = () => {
       title: "Quản lý thông báo",
       description: "Quản lý thông báo",
       path: "/notification",
-      requiredPermissions: ["notification.manage"], 
+      requiredPermissions: ["notification.manage"],
     },
     {
       id: 8,
@@ -124,7 +125,7 @@ const RoleHome = () => {
       title: "Trang xếp lịch làm việc",
       description: "Xem và quản lý lịch làm việc của các nhân viên trong phòng khám",
       path: "/schedule",
-    }
+    },
   ];
 
   // Lọc tính năng dựa trên permissions của user (nếu requiredPermissions rỗng thì ai cũng xem được)

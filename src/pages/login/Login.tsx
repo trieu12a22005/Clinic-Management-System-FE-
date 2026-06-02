@@ -2,10 +2,12 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import authApi from "apis/auth";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
-import { UseAuth } from "@/AuthContext";
+// import { UseAuth } from "@/AuthContext";
 import { url } from "@/utils/url";
+import { query } from "@/lib/queryClient";
+import { useCallback } from "react";
 // Định nghĩa schema validation với zod
 const loginSchema = z.object({
   email: z.string().min(1, "Email là bắt buộc").email("Email không đúng định dạng"),
@@ -18,7 +20,8 @@ const loginSchema = z.object({
 
 type LoginFormData = z.infer<typeof loginSchema>;
 const Login = () => {
-  const { setUser } = UseAuth();
+  // const { setUser } = UseAuth();
+  const queryClient = useQueryClient();
   const {
     register,
     handleSubmit,
@@ -27,10 +30,13 @@ const Login = () => {
     resolver: zodResolver(loginSchema),
   });
   const mutation = useMutation({
-    mutationFn: (data: LoginFormData) => authApi.login(data),
+    mutationFn: async (data: LoginFormData) => await authApi.login(data),
     onSuccess: (res) => {
-      setUser(res.user);
-      console.log("setUser", setUser);
+      const { permissions, ...rest } = res.user;
+      console.log(permissions);
+      queryClient.setQueryData(query.profile, { ...rest });
+      queryClient.setQueryData(query.permissions, permissions);
+      // console.log("setUser", setUser);
       localStorage.setItem("user", JSON.stringify(res.user));
       toast.success("Đăng nhập thành công");
       window.location.href = url.dashboard;
@@ -40,9 +46,12 @@ const Login = () => {
     },
   });
 
-  const onSubmit = (data: LoginFormData) => {
-    mutation.mutate(data);
-  };
+  const onSubmit = useCallback(
+    (data: LoginFormData) => {
+      mutation.mutate(data);
+    },
+    [mutation]
+  );
 
   return (
     <div>

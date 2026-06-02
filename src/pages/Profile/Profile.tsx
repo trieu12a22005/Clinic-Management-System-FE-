@@ -1,7 +1,7 @@
 import { useCallback } from "react";
 import { Avatar, Button, Card, Divider, Skeleton, Tag, Typography } from "antd";
 import { UserOutlined, MailOutlined, EditOutlined, IdcardOutlined, WarningOutlined } from "@ant-design/icons";
-import { selfProfileViewSelector, useProfile } from "./useProfile";
+import { selfProfileViewSelector, useProfile } from "@/hooks/useProfile";
 import dayjs from "dayjs";
 import UpdateModal from "./UpdateModal";
 import useStore from "@/store/useStore";
@@ -77,7 +77,7 @@ const Profile = () => {
               <Avatar
                 size={100}
                 src={profile.avatar}
-                // icon={<UserOutlined />}
+                icon={<UserOutlined />}
                 style={{
                   backgroundColor: "#fff",
                   color: roleColor,

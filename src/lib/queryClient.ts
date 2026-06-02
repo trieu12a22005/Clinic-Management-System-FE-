@@ -13,3 +13,9 @@ export const queryClient = new QueryClient({
     },
   },
 });
+
+export const query = {
+  profile: ["user", "info"],
+  // auth: ["user", "info"],
+  permissions: ["user", "permissions"],
+};

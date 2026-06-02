@@ -1,14 +1,18 @@
-import { Navigate, Outlet, useLocation } from "react-router-dom";
-import { UseAuth } from "@/AuthContext";
+import { Outlet, useNavigate } from "react-router-dom";
+import { useProfile } from "@/hooks/useProfile";
+import { useEffect } from "react";
 
 const ProtectedRoute = () => {
-  const { user } = UseAuth();
-  const location = useLocation();
+  const { data: user, isLoading } = useProfile();
+  console.log("Logged as", user);
 
-  if (!user) {
-    // Redirect to login page, but save the current location they were trying to go to
-    return <Navigate to="/login" state={{ from: location }} replace />;
-  }
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!isLoading && !user) {
+      navigate("/login", { replace: true });
+    }
+  }, [user, isLoading, navigate]);
 
   return <Outlet />;
 };
