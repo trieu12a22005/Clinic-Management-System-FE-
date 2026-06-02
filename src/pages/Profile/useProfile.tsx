@@ -12,20 +12,11 @@ export const selfProfileSelector = (_: Partial<AuthRespone>) => {
   };
 };
 
-export const selfProfileViewSelector = (_: Partial<AuthRespone>) => {
-  const { firstName, lastName, birthDate, email, role, DisplayID, accountID } = _;
-  return {
-    firstName,
-    lastName,
-    birthDate,
-    email,
-    role,
-    DisplayID,
-    accountID,
-  };
+export const selfProfileViewSelector = (_) => {
+  return _;
 };
 
-export const useProfile = (selector: (_: Partial<AuthRespone>) => any = (_) => _) => {
+export const useProfile = (selector: (_) => any = (_) => _) => {
   const query = useQuery({
     queryKey: ["profile"],
     queryFn: async () => {
@@ -38,7 +29,7 @@ export const useProfile = (selector: (_: Partial<AuthRespone>) => any = (_) => _
 };
 export const useUpdateProfile = () => {
   return useMutation({
-    mutationFn: async (data: Partial<AuthRespone>) => {
+    mutationFn: async (data: Record<string, string>) => {
       const res = await authApi.updateProfile(data);
       return res.profile; // directly point to x.profile
     },

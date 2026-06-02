@@ -26,6 +26,8 @@ import EditRoleLayout from "./pages/Role/EditRole/Layout";
 import AppointmentPage from "./pages/Appointment";
 import SystemConfig from "./pages/SystemConfig/SystemConfig";
 import OutsideLayout from "./components/layouts/OutsideLayout";
+import NotFoundError from "./pages/fallback/NotFoundError";
+import TestPage from "./pages/test";
 // import './App.css';
 function App() {
   return (
@@ -68,8 +70,11 @@ function App() {
               </Route>
             </Route>
             <Route path="/appointment" element={<AppointmentPage />} />
+            <Route path="/test" element={<TestPage />} />
           </Route>
         </Route>
+
+        <Route path="*" element={<NotFoundError />} />
       </Routes>
     </>
   );

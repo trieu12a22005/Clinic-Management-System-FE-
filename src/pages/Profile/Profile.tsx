@@ -76,7 +76,8 @@ const Profile = () => {
             <div className="flex items-start gap-6">
               <Avatar
                 size={100}
-                icon={<UserOutlined />}
+                src={profile.avatar}
+                // icon={<UserOutlined />}
                 style={{
                   backgroundColor: "#fff",
                   color: roleColor,
@@ -100,7 +101,7 @@ const Profile = () => {
                       color={roleColor}
                       style={{ fontSize: 14, padding: "4px 16px", borderRadius: 20, fontWeight: 600, marginTop: 16 }}
                     >
-                      {profile.role.roleDescription}
+                      {profile.roleDescription}
                     </Tag>
                   </div>
                 </div>
@@ -130,7 +131,7 @@ const Profile = () => {
           style={{ borderRadius: 16, boxShadow: "0 2px 12px rgba(0,0,0,0.04)", border: "none" }}
         >
           <div className="space-y-5">
-            <InfoRow label="Mã nhân viên" value={`${String(profile.DisplayID)}`} />
+            <InfoRow label="Mã nhân viên" value={profile.displayID} />
             <Divider style={{ margin: "12px 0" }} />
 
             <InfoRow label="Email" value={profile.email} />
