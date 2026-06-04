@@ -27,6 +27,8 @@ import EditRoleLayout from "./pages/Role/EditRole/Layout";
 import AppointmentPage from "./pages/Appointment";
 import SystemConfig from "./pages/SystemConfig/SystemConfig";
 import OutsideLayout from "./components/layouts/OutsideLayout";
+import NotFoundError from "./pages/fallback/NotFoundError";
+import TestPage from "./pages/test";
 // import './App.css';
 function App() {
   return (
@@ -56,11 +58,20 @@ function App() {
             <Route path="/appointment" element={<AppointmentPage />} />
 
             {/* Routes được bảo vệ bởi permission */}
-            <Route element={<PermissionRoute requiredPermissions={["menu.pharmacy_inventory"]} featureName="Kho thuốc" />}>
+            <Route
+              element={<PermissionRoute requiredPermissions={["menu.pharmacy_inventory"]} featureName="Kho thuốc" />}
+            >
               <Route path="/pharmacy-inventory" element={<PharmacyInventory />} />
             </Route>
 
-            <Route element={<PermissionRoute requiredPermissions={["account.view", "account.create"]} featureName="Quản lý tài khoản" />}>
+            <Route
+              element={
+                <PermissionRoute
+                  requiredPermissions={["account.view", "account.create"]}
+                  featureName="Quản lý tài khoản"
+                />
+              }
+            >
               <Route path="/account" element={<ManageAccount />} />
             </Route>
 
@@ -68,7 +79,14 @@ function App() {
               <Route path="/report" element={<Report />} />
             </Route>
 
-            <Route element={<PermissionRoute requiredPermissions={["role.manage"]} featureName="Quản lý phân quyền & cấu hình hệ thống" />}>
+            <Route
+              element={
+                <PermissionRoute
+                  requiredPermissions={["role.manage"]}
+                  featureName="Quản lý phân quyền & cấu hình hệ thống"
+                />
+              }
+            >
               <Route path="/system-config" element={<SystemConfig />} />
               {/* role management */}
               <Route path="/role" element={<RoleLayout />}>
@@ -81,11 +99,20 @@ function App() {
               </Route>
             </Route>
 
-            <Route element={<PermissionRoute requiredPermissions={["timetable.add_new", "timetable.update", "timetable.delete"]} featureName="Xếp lịch làm việc" />}>
+            <Route
+              element={
+                <PermissionRoute
+                  requiredPermissions={["timetable.add_new", "timetable.update", "timetable.delete"]}
+                  featureName="Xếp lịch làm việc"
+                />
+              }
+            >
               <Route path="/schedule" element={<SchedulePage />} />
             </Route>
           </Route>
         </Route>
+
+        <Route path="*" element={<NotFoundError />} />
       </Routes>
     </>
   );

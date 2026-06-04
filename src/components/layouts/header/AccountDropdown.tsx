@@ -2,14 +2,18 @@ import { Avatar, Button, Dropdown, Space } from "antd";
 import type { MenuProps } from "antd";
 import { Link, useNavigate } from "react-router-dom";
 import { DownOutlined, LogoutOutlined, UserOutlined } from "@ant-design/icons";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import authApi from "@/apis/auth";
 import toast from "react-hot-toast";
-import { UseAuth } from "@/AuthContext";
+import { useProfile } from "@/hooks/useProfile";
+import { query } from "@/lib/queryClient";
+import HasPermission from "@/components/HasPermission";
 import { useCheckPermission } from "@/hooks/useCheckPermission";
+// import { UseAuth } from "@/AuthContext";
 function AccountDropdownComponent() {
-  const { user } = UseAuth();
+  const { data: user } = useProfile(); // UseAuth();
   const { hasPermission } = useCheckPermission();
+  const queryClient = useQueryClient();
   const currentName = user ? `${user.firstName} ${user.lastName}` : "";
   const avatarUrl = user?.avatar;
   const mutation = useMutation({
@@ -17,6 +21,9 @@ function AccountDropdownComponent() {
     onSuccess: () => {
       toast.success("Đăng xuất thành công");
       localStorage.removeItem("user");
+      queryClient.removeQueries({
+        queryKey: query.profile,
+      });
       window.location.href = "/login";
     },
     onError: (error) => {
@@ -26,10 +33,14 @@ function AccountDropdownComponent() {
   const navigate = useNavigate();
 
   const items2: MenuProps["items"] = [
-    ...(hasPermission(["role.manage"]) ? [{
-      key: "1",
-      label: "Cấu hình hệ thống",
-    }] : []),
+    ...(hasPermission(["role.manage"])
+      ? [
+          {
+            key: "1",
+            label: "Cấu hình hệ thống",
+          },
+        ]
+      : []),
     {
       key: "2",
       label: "Trang cá nhân",

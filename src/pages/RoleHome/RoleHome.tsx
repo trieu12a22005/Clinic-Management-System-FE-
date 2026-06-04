@@ -1,11 +1,12 @@
-import { UseAuth } from "@/AuthContext";
+// import { UseAuth } from "@/AuthContext";
 import { useNotifications, useMarkNotificationRead } from "./useRoleHome";
 import { Avatar, Calendar, Collapse, Spin, theme } from "antd";
 import dayjs from "dayjs";
 import { useNavigate } from "react-router-dom";
 import { useCheckPermission } from "@/hooks/useCheckPermission";
+import { useProfile } from "@/hooks/useProfile";
 const RoleHome = () => {
-  const { user } = UseAuth();
+  const { data: user } = useProfile();
   const { notifications, isLoading: notiLoading } = useNotifications();
   const markRead = useMarkNotificationRead();
 
@@ -132,7 +133,7 @@ const RoleHome = () => {
       description: "Xem và quản lý lịch làm việc của các nhân viên trong phòng khám",
       path: "/schedule",
       requiredPermissions: ["timetable.add_new", "timetable.update", "timetable.delete"],
-    }
+    },
   ];
 
   // Lọc tính năng dựa trên permissions của user (nếu requiredPermissions rỗng thì ai cũng xem được)

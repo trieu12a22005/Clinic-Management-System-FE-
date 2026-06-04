@@ -13,3 +13,19 @@ export const queryClient = new QueryClient({
     },
   },
 });
+
+export const query = {
+  profile: ["user", "info"],
+  // auth: ["user", "info"],
+  permissions: ["user", "permissions"],
+};
+
+// Debugging
+// TypeScript only:
+declare global {
+  interface Window {
+    __TANSTACK_QUERY_CLIENT__: import("@tanstack/query-core").QueryClient;
+  }
+}
+
+window.__TANSTACK_QUERY_CLIENT__ = queryClient;

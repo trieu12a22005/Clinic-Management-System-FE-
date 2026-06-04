@@ -1,6 +1,8 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import type { ReactNode } from "react";
 import authApi from "./apis/auth";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { query } from "./lib/queryClient";
 
 type User = {
   accountID: string;
@@ -21,14 +23,15 @@ type AuthContextType = {
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
-export const AuthProvider = ({ children }: { children: ReactNode }) => {
+// Code cũ. Từ giờ đổi sang react query thay vì dùng context
+/* export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(() => {
     try {
       const savedUser = localStorage.getItem("user");
       if (savedUser) {
         const parsedUser = JSON.parse(savedUser);
         // Bảo vệ ứng dụng khỏi sập do cache bị lỗi object role
-        if (typeof parsedUser.role === 'object' && parsedUser.role !== null) {
+        if (typeof parsedUser.role === "object" && parsedUser.role !== null) {
           parsedUser.role = parsedUser.role.roleName || "Unknown";
         }
         return parsedUser;
@@ -43,29 +46,42 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   // Tự động tải lại thông tin User (kèm permissions mới nhất) mỗi khi F5
   useEffect(() => {
     if (user) {
-      authApi.getProfile()
-        .then(res => {
+      authApi
+        .getProfile()
+        .then((res) => {
           if (res.user) {
-             setUser(res.user);
-             localStorage.setItem("user", JSON.stringify(res.user));
+            setUser(res.user);
+            localStorage.setItem("user", JSON.stringify(res.user));
           }
         })
-        .catch(err => {
+        .catch((err) => {
           console.error("Failed to refresh profile on load", err);
         });
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  return (
-    <AuthContext.Provider value={{ user, setUser }}>
-      {children}
-    </AuthContext.Provider>
-  );
-};
+  return <AuthContext.Provider value={{ user, setUser }}>{children}</AuthContext.Provider>;
+}; */
 
-export const UseAuth = () => {
+/* export const UseAuth = () => {
   const context = useContext(AuthContext);
   if (!context) throw new Error("useAuth must be used within AuthProvider");
   return context;
+}; */
+
+// Code mới
+export const AuthProvider = ({ children }: { children: ReactNode }) => {
+  const queryClient = useQueryClient();
+  useEffect(() => {
+    const prefetch = async () => {
+      await queryClient.prefetchQuery({
+        queryKey: query.profile,
+        queryFn: authApi.getProfile,
+      });
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    };
+    prefetch();
+  }, [queryClient]);
+  return <>{children}</>;
 };

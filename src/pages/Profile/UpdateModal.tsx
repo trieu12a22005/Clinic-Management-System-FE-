@@ -3,7 +3,7 @@ import dayjs from "dayjs";
 
 import { DatePicker, Form, Input, Modal } from "antd";
 import type { AuthRespone } from "@/types/Auth";
-import { selfProfileSelector, useProfile, useUpdateProfile } from "./useProfile";
+import { selfProfileSelector, useProfile, useUpdateProfile } from "@/hooks/useProfile";
 import useStore from "@/store/useStore";
 import { useCallback, useEffect } from "react";
 function UpdateModal() {

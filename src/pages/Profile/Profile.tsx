@@ -1,7 +1,7 @@
 import { useCallback } from "react";
 import { Avatar, Button, Card, Divider, Skeleton, Tag, Typography } from "antd";
 import { UserOutlined, MailOutlined, EditOutlined, IdcardOutlined, WarningOutlined } from "@ant-design/icons";
-import { selfProfileViewSelector, useProfile } from "./useProfile";
+import { selfProfileViewSelector, useProfile } from "@/hooks/useProfile";
 import dayjs from "dayjs";
 import UpdateModal from "./UpdateModal";
 import useStore from "@/store/useStore";
@@ -76,6 +76,7 @@ const Profile = () => {
             <div className="flex items-start gap-6">
               <Avatar
                 size={100}
+                src={profile.avatar}
                 icon={<UserOutlined />}
                 style={{
                   backgroundColor: "#fff",
@@ -100,7 +101,7 @@ const Profile = () => {
                       color={roleColor}
                       style={{ fontSize: 14, padding: "4px 16px", borderRadius: 20, fontWeight: 600, marginTop: 16 }}
                     >
-                      {profile.role.roleDescription}
+                      {profile.roleDescription}
                     </Tag>
                   </div>
                 </div>
@@ -130,7 +131,7 @@ const Profile = () => {
           style={{ borderRadius: 16, boxShadow: "0 2px 12px rgba(0,0,0,0.04)", border: "none" }}
         >
           <div className="space-y-5">
-            <InfoRow label="Mã nhân viên" value={`${String(profile.DisplayID)}`} />
+            <InfoRow label="Mã nhân viên" value={profile.displayID} />
             <Divider style={{ margin: "12px 0" }} />
 
             <InfoRow label="Email" value={profile.email} />

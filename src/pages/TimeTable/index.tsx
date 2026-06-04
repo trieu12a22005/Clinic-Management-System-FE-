@@ -1,13 +1,14 @@
+import { useProfile } from "@/hooks/useProfile";
 import TimetableList from "./components/TimetableList";
-import { UseAuth } from "@/AuthContext";
+// import { UseAuth } from "@/AuthContext";
 const Timetable = () => {
-    const { user } = UseAuth();
+  const { data: user } = useProfile();
 
-    console.log(user);
-    return (
-        <div>
-            <TimetableList accountID={user?.id || ""} />
-        </div>
-    )
-}
+  console.log(user);
+  return (
+    <div>
+      <TimetableList accountID={user?.id || ""} />
+    </div>
+  );
+};
 export default Timetable;

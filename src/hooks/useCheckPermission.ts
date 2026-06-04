@@ -1,12 +1,11 @@
-import { UseAuth } from "@/AuthContext";
 import { useCallback } from "react";
+import { usePermissions } from "./usePermission";
 
 /**
  * Hook kiểm tra xem user hiện tại có quyền thực hiện hành động hay không.
  */
 export const useCheckPermission = () => {
-  const { user } = UseAuth();
-
+  const { data: permissions } = usePermissions();
   const hasPermission = useCallback(
     (requiredPermissions: string[]) => {
       // Nếu truyền vào mảng rỗng thì ai cũng pass
@@ -14,14 +13,14 @@ export const useCheckPermission = () => {
         return true;
       }
 
-      if (!user?.permissions) {
+      if (!permissions) {
         return false;
       }
 
       // Kiểm tra xem user có ít nhất 1 quyền trong danh sách yêu cầu không
-      return requiredPermissions.some((perm) => user.permissions?.includes(perm));
+      return requiredPermissions.some((perm) => permissions?.includes(perm));
     },
-    [user]
+    [permissions]
   );
 
   return { hasPermission };
