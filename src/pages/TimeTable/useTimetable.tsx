@@ -6,7 +6,7 @@ export const useTimetable = (accountID: string) => {
     const query = useQuery({
         queryKey: ['timetables', accountID],
         queryFn: async () => {
-            const res = await timeTableApi.getTimetable(accountID);
+            const res = await timeTableApi.getTimetableByDoctor(accountID);
             return res.timetables as TimetableResponse[];
         },
         enabled: !!accountID,
@@ -22,8 +22,9 @@ export const useAllTimetable = () => {
     const query = useQuery({
         queryKey: ['allTimetables'],
         queryFn: async () => {
-            const res = await timeTableApi.getAllTimetable();
-            return res.timetables as TimetableResponse[];
+            const res = await timeTableApi.getAllTimetables();
+            const flattened = Object.values(res.timetables).flat();
+            return flattened as unknown as TimetableResponse[];
         },
     });
     return {

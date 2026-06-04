@@ -10,11 +10,6 @@ export const useCheckPermission = () => {
   const { data: permissions } = usePermissions();
   const hasPermission = useCallback(
     (requiredPermissions: string[]) => {
-      // Admin hoặc Manager mặc định có full quyền
-      if (role === "Admin" || role === "Manager") {
-        return true;
-      }
-
       // Nếu truyền vào mảng rỗng thì ai cũng pass
       if (!requiredPermissions || requiredPermissions.length === 0) {
         return true;

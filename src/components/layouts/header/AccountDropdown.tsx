@@ -30,16 +30,20 @@ function AccountDropdownComponent() {
   const navigate = useNavigate();
 
   const items2: MenuProps["items"] = [
-    {
-      key: "1",
-      label: "Cấu hình hệ thống",
-    },
+    ...(hasPermission(["role.manage"])
+      ? [
+          {
+            key: "1",
+            label: "Cấu hình hệ thống",
+          },
+        ]
+      : []),
     {
       key: "2",
       label: "Trang cá nhân",
     },
     {
-      type: "divider",
+      type: "divider" as const,
     },
     {
       key: "3",
