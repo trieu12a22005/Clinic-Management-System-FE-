@@ -6,8 +6,10 @@ import { useMutation } from "@tanstack/react-query";
 import authApi from "@/apis/auth";
 import toast from "react-hot-toast";
 import { UseAuth } from "@/AuthContext";
+import { useCheckPermission } from "@/hooks/useCheckPermission";
 function AccountDropdownComponent() {
   const { user } = UseAuth();
+  const { hasPermission } = useCheckPermission();
   const currentName = user ? `${user.firstName} ${user.lastName}` : "";
   const avatarUrl = user?.avatar;
   const mutation = useMutation({
@@ -24,16 +26,16 @@ function AccountDropdownComponent() {
   const navigate = useNavigate();
 
   const items2: MenuProps["items"] = [
-    {
+    ...(hasPermission(["role.manage"]) ? [{
       key: "1",
       label: "Cấu hình hệ thống",
-    },
+    }] : []),
     {
       key: "2",
       label: "Trang cá nhân",
     },
     {
-      type: "divider",
+      type: "divider" as const,
     },
     {
       key: "3",

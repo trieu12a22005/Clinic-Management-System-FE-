@@ -117,7 +117,7 @@ const RoleHome = () => {
       title: "Quản lý Phân quyền",
       description: "Xem, tạo, chỉnh sửa và gán vai trò; quản lý quyền truy cập hệ thống.",
       path: "/role",
-      requiredPermissions: [], // Tạm thời ai cũng thấy, chưa cần phân quyền như user yêu cầu
+      requiredPermissions: ["role.manage"],
     },
     {
       id: 12,
