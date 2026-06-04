@@ -5,6 +5,7 @@ import { selfProfileViewSelector, useProfile } from "@/hooks/useProfile";
 import dayjs from "dayjs";
 import UpdateModal from "./UpdateModal";
 import useStore from "@/store/useStore";
+import HasPermission from "@/components/HasPermission";
 
 const { Title, Text } = Typography;
 
@@ -119,14 +120,16 @@ const Profile = () => {
             </div>
           }
           extra={
-            <Button
-              type="primary"
-              icon={<EditOutlined />}
-              onClick={toggleModalHandler}
-              style={{ borderRadius: 8, background: roleColor, borderColor: roleColor }}
-            >
-              Chỉnh sửa
-            </Button>
+            <HasPermission requiredPermissions={["self.update_profile"]}>
+              <Button
+                type="primary"
+                icon={<EditOutlined />}
+                onClick={toggleModalHandler}
+                style={{ borderRadius: 8, background: roleColor, borderColor: roleColor }}
+              >
+                Chỉnh sửa
+              </Button>
+            </HasPermission>
           }
           style={{ borderRadius: 16, boxShadow: "0 2px 12px rgba(0,0,0,0.04)", border: "none" }}
         >

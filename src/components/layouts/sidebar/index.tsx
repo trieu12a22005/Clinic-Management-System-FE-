@@ -35,7 +35,7 @@ function SidebarLayout() {
       <Button
         type="default"
         onClick={() => setCollapsed(!collapsed)}
-        icon={collapsed ? <LeftOutlined /> : <RightOutlined />}
+        icon={!collapsed ? <LeftOutlined /> : <RightOutlined />}
         style={btnStyle}
       />
     </>
