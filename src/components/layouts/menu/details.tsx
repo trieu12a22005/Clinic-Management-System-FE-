@@ -35,7 +35,7 @@ const flatMenuItems: FlatMenuItem[] = [
   {
     key: "clinical/schedule",
     label: "Quản lý lịch trực",
-    to: "/timetable",
+    to: "/schedule",
     requiredPermissions: ["timetable.update"],
   },
   {
@@ -49,6 +49,12 @@ const flatMenuItems: FlatMenuItem[] = [
     label: "Khám bệnh",
     to: "/waiting-room",
     requiredPermissions: ["ticket.view_all"],
+  },
+  {
+    key: "clinical/patient-history",
+    label: "Lịch sử khám",
+    requiredPermissions: ["appointment.view", "ticket.view_all"],
+    to: "/patient-history",
   },
   {
     key: "pharmacy",
@@ -79,16 +85,6 @@ const flatMenuItems: FlatMenuItem[] = [
     requiredPermissions: ["report.view"],
   },
   {
-    key: "utilities",
-    label: "Tiện ích",
-    icon: <SearchOutlined />,
-  },
-  {
-    key: "utilities/system-config-icd",
-    label: "Tra cứu mã ICD",
-    to: "/system-config?config=icd",
-  },
-  {
     key: "system",
     label: "Hệ thống",
     icon: <SettingOutlined />,
@@ -109,6 +105,11 @@ const flatMenuItems: FlatMenuItem[] = [
     label: "Quản lý tài khoản",
     to: "/account",
     requiredPermissions: ["account.view"],
+  },
+  {
+    key: "system/notification",
+    label: "Thông báo",
+    to: "/notification",
   },
 ];
 
