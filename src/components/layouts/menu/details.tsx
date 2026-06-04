@@ -1,11 +1,5 @@
 import type { MenuProps } from "antd";
-import {
-  ExperimentOutlined,
-  MedicineBoxOutlined,
-  SearchOutlined,
-  SettingOutlined,
-  PieChartOutlined,
-} from "@ant-design/icons";
+import { ExperimentOutlined, MedicineBoxOutlined, SettingOutlined, PieChartOutlined } from "@ant-design/icons";
 import { Link } from "react-router-dom";
 import { useMemo, type ReactNode } from "react";
 import { useCheckPermission } from "@/hooks/useCheckPermission";
@@ -65,7 +59,7 @@ const flatMenuItems: FlatMenuItem[] = [
     key: "pharmacy/pharmacy-inventory",
     label: "Quản lý thuốc",
     to: "/pharmacy-inventory",
-    requiredPermissions: ["medicine.add", "medicine.delete", "medicine.update"],
+    requiredPermissions: ["medicine.add", "medicine.delete", "medicine.update", "menu.pharmacy_inventory"],
   },
   {
     key: "pharmacy/pharmacy-queue",

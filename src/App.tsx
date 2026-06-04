@@ -28,7 +28,7 @@ import AppointmentPage from "./pages/Appointment";
 import SystemConfig from "./pages/SystemConfig/SystemConfig";
 import OutsideLayout from "./components/layouts/OutsideLayout";
 import NotFoundError from "./pages/fallback/NotFoundError";
-import TestPage from "./pages/test";
+// import TestPage from "./pages/test";
 // import './App.css';
 function App() {
   return (
@@ -79,16 +79,8 @@ function App() {
               <Route path="/report" element={<Report />} />
             </Route>
 
-            <Route
-              element={
-                <PermissionRoute
-                  requiredPermissions={["role.manage"]}
-                  featureName="Quản lý phân quyền & cấu hình hệ thống"
-                />
-              }
-            >
-              <Route path="/system-config" element={<SystemConfig />} />
-              {/* role management */}
+            {/* role management */}
+            <Route element={<PermissionRoute requiredPermissions={["role.manage"]} featureName="Quản lý phân quyền" />}>
               <Route path="/role" element={<RoleLayout />}>
                 <Route index element={<RoleDashboardPage />} />
                 <Route path="details" element={<EditRoleLayout />}>
@@ -99,6 +91,7 @@ function App() {
               </Route>
             </Route>
 
+            <Route path="/system-config" element={<SystemConfig />} />
             <Route
               element={
                 <PermissionRoute
