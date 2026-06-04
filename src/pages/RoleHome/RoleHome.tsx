@@ -59,7 +59,7 @@ const RoleHome = () => {
       title: "Quản lý Lịch làm việc - SCH.01",
       description: "Hỗ trợ lên lịch hẹn, theo dõi ca trực và sắp xếp phòng khám.",
       path: "/timetable",
-      requiredPermissions: ["timetable.view", "timetable.view_all"],
+      requiredPermissions: ["timetable.view"],
     },
     {
       id: 2,
@@ -82,7 +82,7 @@ const RoleHome = () => {
       access: "Dược sĩ, Quản lý",
       path: "/pharmacy-inventory",
       // Đã chuyển sang dùng quyền UI chuyên biệt: "menu.pharmacy_inventory"
-      requiredPermissions: ["menu.pharmacy_inventory"], 
+      requiredPermissions: ["menu.pharmacy_inventory"],
     },
     {
       id: 6,
@@ -96,7 +96,7 @@ const RoleHome = () => {
       title: "Quản lý thông báo",
       description: "Quản lý thông báo",
       path: "/notification",
-      requiredPermissions: ["notification.manage"], 
+      requiredPermissions: ["notification.manage"],
     },
     {
       id: 8,
@@ -120,10 +120,18 @@ const RoleHome = () => {
       requiredPermissions: [], // Tạm thời ai cũng thấy, chưa cần phân quyền như user yêu cầu
     },
     {
-      id: 10,
+      id: 12,
+      title: "Báo cáo thống kê",
+      description: "Xem và xuất các báo cáo doanh thu, khám bệnh, thuốc",
+      path: "/report",
+      requiredPermissions: ["report.view"],
+    },
+    {
+      id: 11,
       title: "Trang xếp lịch làm việc",
       description: "Xem và quản lý lịch làm việc của các nhân viên trong phòng khám",
       path: "/schedule",
+      requiredPermissions: ["timetable.add_new", "timetable.update", "timetable.delete"],
     }
   ];
 

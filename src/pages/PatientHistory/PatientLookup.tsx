@@ -18,7 +18,7 @@ const PatientLookup = () => {
 
     const { data, isLoading, isError } = useQuery({
         queryKey: ["patientLookup", dateStr, searchKeyword],
-        queryFn: () => reportApi.getBM3(searchKeyword ? undefined : dateStr, searchKeyword),
+        queryFn: () => examineApi.getPatientLookup(searchKeyword ? undefined : dateStr, searchKeyword),
     });
 
     const { data: recordData, isLoading: isRecordLoading } = useQuery({

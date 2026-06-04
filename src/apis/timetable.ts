@@ -73,11 +73,11 @@ class TimeTableApi {
 
   /**
    * Get all timetable entries of a faculty, grouped by day of week
-   * @param facultyID - Required faculty ID to filter timetables
+   * @param facultyID - Optional faculty ID to filter timetables
    */
-  async getAllTimetables(facultyID: string): Promise<GroupedTimetablesResponse> {
+  async getAllTimetables(facultyID?: string): Promise<GroupedTimetablesResponse> {
     const response = await apiClient.get('/admin/timetables', {
-      params: { facultyID },
+      params: facultyID ? { facultyID } : undefined,
     });
     return response.data;
   }
