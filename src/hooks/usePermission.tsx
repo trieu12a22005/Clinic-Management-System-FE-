@@ -7,7 +7,7 @@ export function usePermissions() {
     queryKey: query.permissions,
     queryFn: authApi.getProfile,
     select: (user) => {
-      const { permissions } = user;
+      const { permissions } = user.user;
       return permissions;
     },
   });

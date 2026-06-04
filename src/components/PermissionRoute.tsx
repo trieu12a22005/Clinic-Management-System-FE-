@@ -1,8 +1,9 @@
 import { Navigate, Outlet } from "react-router-dom";
 import { useCheckPermission } from "@/hooks/useCheckPermission";
-import { UseAuth } from "@/AuthContext";
+// import { UseAuth } from "@/AuthContext";
 import { useEffect } from "react";
 import toast from "react-hot-toast";
+import { useProfile } from "@/hooks/useProfile";
 
 interface PermissionRouteProps {
   /** Danh sách quyền yêu cầu — user cần có ít nhất 1 quyền trong list này */
@@ -22,17 +23,17 @@ const PermissionRoute = ({
   featureName = "tính năng này",
   redirectTo = "/dashboard",
 }: PermissionRouteProps) => {
-  const { user } = UseAuth();
+  const { data: user } = useProfile();
   const { hasPermission } = useCheckPermission();
 
   const isAllowed = !!user && hasPermission(requiredPermissions);
 
   useEffect(() => {
     if (user && !isAllowed) {
-      toast.error(
-        `🔒 Bạn không có quyền truy cập ${featureName}. Vui lòng liên hệ quản trị viên để được cấp quyền.`,
-        { duration: 5000, id: "permission-denied" }
-      );
+      toast.error(`🔒 Bạn không có quyền truy cập ${featureName}. Vui lòng liên hệ quản trị viên để được cấp quyền.`, {
+        duration: 5000,
+        id: "permission-denied",
+      });
     }
   }, [isAllowed, user, featureName]);
 

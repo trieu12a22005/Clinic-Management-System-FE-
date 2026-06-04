@@ -2,13 +2,15 @@ import React from "react";
 import { Menu, ConfigProvider } from "antd";
 
 import { main } from "../sidebar";
-import { sideBarItems } from "./details";
+import { useSidebarItem } from "./details";
 
 type MenuAppProps = {
   collapsed: boolean;
 };
 
 const MenuApp: React.FC<MenuAppProps> = () => {
+  const sideBarItems = useSidebarItem();
+
   return (
     <ConfigProvider
       theme={{

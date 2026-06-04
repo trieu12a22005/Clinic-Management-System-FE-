@@ -7,9 +7,12 @@ import authApi from "@/apis/auth";
 import toast from "react-hot-toast";
 import { useProfile } from "@/hooks/useProfile";
 import { query } from "@/lib/queryClient";
+import HasPermission from "@/components/HasPermission";
+import { useCheckPermission } from "@/hooks/useCheckPermission";
 // import { UseAuth } from "@/AuthContext";
 function AccountDropdownComponent() {
   const { data: user } = useProfile(); // UseAuth();
+  const { hasPermission } = useCheckPermission();
   const queryClient = useQueryClient();
   const currentName = user ? `${user.firstName} ${user.lastName}` : "";
   const avatarUrl = user?.avatar;
