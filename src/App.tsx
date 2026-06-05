@@ -1,4 +1,4 @@
-import { Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
 import Login from "pages/login/Login";
 import MainLayout from "components/layouts/MainLayout";
 import ProtectedRoute from "components/ProtectedRoute";
@@ -38,6 +38,9 @@ function App() {
         <Route element={<OutsideLayout />}>
           <Route path="/login" element={<Login />} />
         </Route>
+
+        {/* Root redirect: chưa đăng nhập → /login, đã đăng nhập → /dashboard */}
+        <Route path="/" element={<Navigate to="/dashboard" replace />} />
 
         <Route element={<MainLayout />}>
           <Route element={<ProtectedRoute />}>
