@@ -5,7 +5,6 @@ import App from "./App";
 import { queryClient } from "./lib/queryClient";
 import "./index.css";
 import { Toaster } from "react-hot-toast";
-import { AuthProvider } from "./AuthContext";
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <QueryClientProvider client={queryClient}>
     {/* <AuthProvider> */}

@@ -2,7 +2,6 @@ import { CalendarOutlined, UserOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
 
 import { DatePicker, Form, Input, Modal } from "antd";
-import type { AuthRespone } from "@/types/Auth";
 import { selfProfileSelector, useProfile, useUpdateProfile } from "@/hooks/useProfile";
 import useStore from "@/store/useStore";
 import { useCallback, useEffect } from "react";
@@ -32,11 +31,10 @@ function UpdateModal() {
     try {
       console.log("I got triggered");
       const values = await editForm.validateFields();
-      const payload: Partial<AuthRespone> = {
-        // ...profile,
+      const payload: Record<string, string> = {
         firstName: values.firstName,
         lastName: values.lastName,
-        birthDate: values.birthDate ? dayjs(values.birthDate).format("YYYY-MM-DD") : profile.birthDate,
+        birthDate: values.birthDate ? dayjs(values.birthDate).format("YYYY-MM-DD") : (profile?.birthDate ?? ""),
       };
       await updateProfile.mutateAsync(payload);
       blur();

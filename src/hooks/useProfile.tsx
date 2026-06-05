@@ -12,12 +12,12 @@ export const selfProfileSelector = (_: Partial<AuthRespone>) => {
   };
 };
 
-export const selfProfileViewSelector = (_) => {
+export const selfProfileViewSelector = (_: Record<string, unknown>) => {
   const { permissions, ...rest } = _;
   return { ...rest };
 };
 
-export const useProfile = (selector: (_) => any = selfProfileViewSelector) => {
+export const useProfile = (selector: (_: unknown) => unknown = selfProfileViewSelector) => {
   const query = useQuery({
     // use q as queryMap
     queryKey: q.profile,

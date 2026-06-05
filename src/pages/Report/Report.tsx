@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type ReactElement } from "react";
 import { Button } from "antd";
 import { PrinterOutlined, FileTextOutlined } from "@ant-design/icons";
 import BM1 from "./components/BM1";
@@ -11,7 +11,7 @@ const TABS = [
     { key: "bm5_2", label: "BM5.2", title: "Báo Cáo Sử Dụng Thuốc", color: "bg-rose-500" },
 ];
 
-const COMPONENTS: Record<string, JSX.Element> = {
+const COMPONENTS: Record<string, ReactElement> = {
     bm1: <BM1 />,
     bm5_1: <BM5_1 />,
     bm5_2: <BM5_2 />,

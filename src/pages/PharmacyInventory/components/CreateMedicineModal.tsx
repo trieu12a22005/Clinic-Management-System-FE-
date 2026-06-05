@@ -75,7 +75,7 @@ export const CreateMedicineModal = ({
     const newErrors: Record<string, string> = {};
     let hasError = false;
 
-    rows.forEach((row, index) => {
+    rows.forEach((row, _index) => {
       if (!row.medicineName.trim()) {
         newErrors[`${row.id}-name`] = 'Vui lòng nhập tên thuốc';
         hasError = true;

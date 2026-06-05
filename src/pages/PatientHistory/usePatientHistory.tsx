@@ -1,5 +1,4 @@
 import examineApi from "@/apis/examine";
-import type { ExamineHistoryItem } from "@/types/examine";
 import { useQuery } from "@tanstack/react-query";
 
 export const usePatientHistory = (id: string) => {

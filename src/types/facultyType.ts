@@ -1,9 +1,7 @@
-export interface Faculty {
-    facultyID: string;
-    facultyName: string;
-    createdAt: string;
-    updatedAt: string;
-}
+import type { Faculty } from "@/apis/faculty";
+
+export type { Faculty };
+
 export interface FacultyFilterProps {
   faculties: Faculty[];
   activeFacultyId: string | null;

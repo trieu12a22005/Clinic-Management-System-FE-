@@ -9,7 +9,7 @@ function RoleDisplay() {
     console.log("Mounted role dp");
   }, []);
   const triggerSavePromptHandler = useTriggerInput();
-  const { control, setValue, clearErrors } = useFormContext();
+  const { control, setValue } = useFormContext();
 
 
   return (

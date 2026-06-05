@@ -31,7 +31,7 @@ const BM5_1 = () => {
     const y = month.year();
 
     const { report, isLoading, isError } = UseBM5_1(m, y);
-    const data = report?.data || [];
+    const data: BM5_1Row[] = (report?.data as BM5_1Row[]) || [];
 
     return (
         <div>
@@ -59,7 +59,7 @@ const BM5_1 = () => {
 
             <Table<BM5_1Row>
                 columns={columns}
-                dataSource={data as BM5_1Row[]}
+                dataSource={data}
                 loading={isLoading}
                 rowKey="stt"
                 pagination={false}

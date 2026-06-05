@@ -34,7 +34,7 @@ const mockData: ExamineHistoryItem[] = [
   },
 ];
 const HistoryPage = () => {
-    const { id } = useParams();
+    useParams();
     const data = usePatientHistory("73df2a99-649a-4efd-8081-73508f75b32f");
     console.log(data);
   return <PatientHistory data={mockData} />;

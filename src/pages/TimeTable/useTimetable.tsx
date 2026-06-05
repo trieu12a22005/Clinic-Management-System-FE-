@@ -1,13 +1,12 @@
 // src/hooks/useTimetable.ts
 import timeTableApi from '@/apis/timetable';
-import type { TimetableObject } from '@/apis/timetable';
 import { useQuery } from '@tanstack/react-query';
 export const useTimetable = (accountID: string) => {
     const query = useQuery({
         queryKey: ['timetables', accountID],
         queryFn: async () => {
             const res = await timeTableApi.getTimetableByDoctor(accountID);
-            return res.timetables as TimetableObject[];
+            return res.timetables;
         },
         enabled: !!accountID,
     });
@@ -24,7 +23,7 @@ export const useAllTimetable = () => {
         queryFn: async () => {
             const res = await timeTableApi.getAllTimetables();
             const flattened = Object.values(res.timetables).flat();
-            return flattened as TimetableObject[];
+            return flattened;
         },
     });
     return {
@@ -40,7 +39,7 @@ export const useTimetableByDay = (accountID: string, dayOfWeek: string) => {
         queryKey: ['timetables', accountID, dayOfWeek],
         queryFn: async () => {
             const res = await timeTableApi.getTimetableByDay(accountID, dayOfWeek);
-            return res.timetables as TimetableObject[];
+            return res.timetables;
         },
         enabled: !!accountID && !!dayOfWeek,
     });

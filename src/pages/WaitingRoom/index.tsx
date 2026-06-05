@@ -52,10 +52,11 @@ const WaitingRoomPage = () => {
     return <Navigate to="/dashboard" replace />;
   }
 
-  const currentRoomID = timetables![0]?.roomID || "";
+  const firstTimetable = timetables?.[0];
+  const currentRoomID = firstTimetable?.roomID ?? "";
 
   return (
-    <WaitingRoomContent roomID={currentRoomID} timetable={timetables![0]} />
+    <WaitingRoomContent roomID={currentRoomID} timetable={firstTimetable!} />
   );
 };
 

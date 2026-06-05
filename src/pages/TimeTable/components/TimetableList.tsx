@@ -28,7 +28,7 @@ const TimetableList = ({ accountID }: { accountID: string }) => {
             if (!map.has(t.roomID)) {
                 map.set(t.roomID, {
                     roomID: t.roomID,
-                    roomName: t.room.roomName,
+                    roomName: t.room.roomName ?? '',
                     facultyName: t.room.faculty?.facultyName,
                     facultyID: t.room.faculty?.facultyID,
                 });
@@ -100,7 +100,7 @@ const TimetableList = ({ accountID }: { accountID: string }) => {
                 {/* Faculty Filter */}
                 <div className={`transition-all duration-500 overflow-hidden ${activeTab === 'TOÀN BỆNH VIỆN' ? 'max-h-32 mb-8 opacity-100' : 'max-h-0 opacity-0'}`}>
                     <FacultyFilter
-                        faculties={faculties}
+                    faculties={faculties}
                         activeFacultyId={activeFacultyId}
                         onSelectFaculty={setActiveFacultyId}
                     />

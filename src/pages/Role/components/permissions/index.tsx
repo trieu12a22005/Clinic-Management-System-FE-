@@ -118,7 +118,7 @@ function PermissionList() {
               expandable={{
                 defaultExpandAllRows: true,
                 expandRowByClick: true,
-                expandIcon: ({ expanded, record }) => {
+                expandIcon: ({ expanded, onExpand: _onExpand, record }) => {
                   if (!record.children?.length) {
                     return <span className="inline-block w-7" />;
                   }
@@ -159,8 +159,8 @@ function PermissionList() {
                   // console.log(nextSelectedKeys);
                   const nextValue = nextSelectedKeys
                     .map((key) => permissionMap.get(String(key)))
-                    .filter(Boolean)
-                    .map((p) => (p as Permission).permissionID);
+                    .filter((_): _ is Permission => Boolean(_))
+                    .map((p) => p.permissionID);
                   field.onChange(nextValue);
                   triggerSavePromptHandler();
                 },
