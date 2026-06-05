@@ -31,10 +31,9 @@ function UpdateModal() {
     try {
       console.log("I got triggered");
       const values = await editForm.validateFields();
-      const payload: Record<string, string> = {
+      const payload: { firstName?: string; lastName?: string } = {
         firstName: values.firstName,
         lastName: values.lastName,
-        birthDate: values.birthDate ? dayjs(values.birthDate).format("YYYY-MM-DD") : (profile?.birthDate ?? ""),
       };
       await updateProfile.mutateAsync(payload);
       blur();

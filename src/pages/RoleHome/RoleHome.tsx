@@ -191,7 +191,7 @@ const RoleHome = () => {
             <h1 className="text-xl text-gray-800 font-semibold">
               Chào mừng quay trở lại, {user?.roleDescription} {user?.firstName + " " + user?.lastName}! 👋
             </h1>
-            <p className="text-[#1867c0] text-sm capitalize">{user?.role}</p>
+            <p className="text-[#1867c0] text-sm capitalize">{user?.roleName}</p>
           </div>
         </div>
       </div>
