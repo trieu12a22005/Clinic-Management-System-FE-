@@ -1,7 +1,7 @@
 import { useCallback } from "react";
 import { Avatar, Button, Card, Divider, Skeleton, Tag, Typography } from "antd";
 import { UserOutlined, MailOutlined, EditOutlined, IdcardOutlined, WarningOutlined } from "@ant-design/icons";
-import { selfProfileViewSelector, useProfile } from "@/hooks/useProfile";
+import { useProfile } from "@/hooks/useProfile";
 import dayjs from "dayjs";
 import UpdateModal from "./UpdateModal";
 import useStore from "@/store/useStore";
@@ -10,7 +10,7 @@ import HasPermission from "@/components/HasPermission";
 const { Title, Text } = Typography;
 
 const Profile = () => {
-  const { data: profile, isLoading, isError } = useProfile(selfProfileViewSelector);
+  const { data: profile, isLoading, isError } = useProfile();
 
   const trigger = useStore((state) => state.behaviour.modal.trigger);
   const toggleModalHandler = useCallback(() => {
@@ -134,7 +134,7 @@ const Profile = () => {
           style={{ borderRadius: 16, boxShadow: "0 2px 12px rgba(0,0,0,0.04)", border: "none" }}
         >
           <div className="space-y-5">
-            <InfoRow label="Mã nhân viên" value={profile.displayID} />
+            <InfoRow label="Mã nhân viên" value={profile.DisplayID} />
             <Divider style={{ margin: "12px 0" }} />
 
             <InfoRow label="Email" value={profile.email} />

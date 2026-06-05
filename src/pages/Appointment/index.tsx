@@ -7,7 +7,6 @@ import appointmentApi, {
   type CreateAppointmentPayload,
 } from '@/apis/appointment';
 import facultyApi from '@/apis/faculty';
-import type { Faculty } from '@/types/facultyType';
 import AppointmentTable from './components/AppointmentTable';
 import CreateAppointmentModal from './components/CreateAppointmentModal';
 
@@ -60,15 +59,7 @@ const AppointmentPage = () => {
   );
 
   const faculties = useMemo(
-    () => {
-      const rawFaculties = facultiesResponse?.faculties ?? [];
-      return rawFaculties.map((f) => ({
-        facultyID: f.facultyID,
-        facultyName: f.facultyName,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      })) as Faculty[];
-    },
+    () => facultiesResponse?.faculties ?? [],
     [facultiesResponse]
   );
 

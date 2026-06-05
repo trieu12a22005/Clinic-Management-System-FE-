@@ -1,4 +1,5 @@
 import { apiClient } from './axios';
+import type { BM3Response } from '@/types/reportType';
 
 class ReportApi {
     async getBM1(date: string) {

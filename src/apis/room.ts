@@ -52,7 +52,7 @@ const extractRooms = (response: RoomsApiResponse | unknown): RoomOption[] => {
             ? ((response as RoomsApiResponse).data as unknown[])
             : [];
 
-  return payload
+  return (payload ?? [])
     .map(normalizeRoom)
     .filter((room): room is RoomOption => room !== null);
 };

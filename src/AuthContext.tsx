@@ -1,7 +1,7 @@
-import { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useEffect } from "react";
 import type { ReactNode } from "react";
 import authApi from "./apis/auth";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { query } from "./lib/queryClient";
 
 type User = {
@@ -21,7 +21,9 @@ type AuthContextType = {
   setUser: React.Dispatch<React.SetStateAction<User | null>>;
 };
 
-const AuthContext = createContext<AuthContextType | null>(null);
+// AuthContext — kept for potential future use
+const _AuthContext = createContext<AuthContextType | null>(null);
+void _AuthContext; // suppress unused warning
 
 // Code cũ. Từ giờ đổi sang react query thay vì dùng context
 /* export const AuthProvider = ({ children }: { children: ReactNode }) => {
