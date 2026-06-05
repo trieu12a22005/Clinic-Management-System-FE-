@@ -7,7 +7,6 @@ import authApi from "@/apis/auth";
 import toast from "react-hot-toast";
 import { useProfile } from "@/hooks/useProfile";
 import { query } from "@/lib/queryClient";
-import HasPermission from "@/components/HasPermission";
 import { useCheckPermission } from "@/hooks/useCheckPermission";
 // import { UseAuth } from "@/AuthContext";
 function AccountDropdownComponent() {
@@ -35,11 +34,11 @@ function AccountDropdownComponent() {
   const items2: MenuProps["items"] = [
     ...(hasPermission(["role.manage"])
       ? [
-          {
-            key: "1",
-            label: "Cấu hình hệ thống",
-          },
-        ]
+        {
+          key: "1",
+          label: "Cấu hình hệ thống",
+        },
+      ]
       : []),
     {
       key: "2",
