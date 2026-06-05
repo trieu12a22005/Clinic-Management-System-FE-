@@ -2,7 +2,7 @@ import { Input, Tooltip } from "antd";
 import { QuestionCircleOutlined } from "@ant-design/icons";
 import { Controller, useFormContext } from "react-hook-form";
 import useTriggerInput from "../hooks/useTriggerInput";
-import { useCallback, useEffect } from "react";
+import { useEffect } from "react";
 
 function RoleDisplay() {
   useEffect(() => {
@@ -11,14 +11,6 @@ function RoleDisplay() {
   const triggerSavePromptHandler = useTriggerInput();
   const { control, setValue, clearErrors } = useFormContext();
 
-  const inputRoleNameHandler = useCallback(() => {
-    clearErrors("roleName");
-    triggerSavePromptHandler();
-  }, [clearErrors, triggerSavePromptHandler]);
-  const inputRoleDescriptionHandler = useCallback(() => {
-    clearErrors("roleDescription");
-    triggerSavePromptHandler();
-  }, [clearErrors, triggerSavePromptHandler]);
 
   return (
     <div className="grid gap-4">

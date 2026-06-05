@@ -2,7 +2,6 @@ import { useState } from "react";
 import { DatePicker, Table, Tag, Spin, Alert } from "antd";
 import { CalendarOutlined } from "@ant-design/icons";
 import dayjs, { type Dayjs } from "dayjs";
-import type { BM1Item } from "@/types/reportType";
 import { UseBM1 } from "../useReport";
 
 const columns = [

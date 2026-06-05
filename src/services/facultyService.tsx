@@ -1,11 +1,11 @@
 import facultyApi from '@/apis/faculty';
-import type { Faculty } from '@/types/facultyType';
+import type { Faculty } from '@/apis/faculty';
 import { useQuery } from '@tanstack/react-query';
 const FacultyService = () =>{
     const query = useQuery({
         queryKey: ['faculty'],
         queryFn: async () => {
-            const res = await facultyApi.getFaculty();
+            const res = await facultyApi.getFaculties();
             return res.faculties as Faculty[];
         }
     });

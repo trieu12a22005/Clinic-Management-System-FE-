@@ -6,6 +6,14 @@ import { UseBM5_1 } from "../useReport";
 
 const { MonthPicker } = DatePicker;
 
+interface BM5_1Row {
+    stt: number;
+    date: string;
+    patientCount: number;
+    revenue: number;
+    ratio: string;
+}
+
 const columns = [
     { title: "STT", dataIndex: "stt", width: 60, align: "center" as const },
     { title: "Ngày", dataIndex: "date", width: 130, align: "center" as const },
@@ -49,9 +57,9 @@ const BM5_1 = () => {
                 </div>
             )}
 
-            <Table
+            <Table<BM5_1Row>
                 columns={columns}
-                dataSource={data}
+                dataSource={data as BM5_1Row[]}
                 loading={isLoading}
                 rowKey="stt"
                 pagination={false}

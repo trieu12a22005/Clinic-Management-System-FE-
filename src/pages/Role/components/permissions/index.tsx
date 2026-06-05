@@ -2,7 +2,7 @@ import type { Permission } from "@/types/role";
 import { Switch, Table } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import usePermission from "../../hooks/usePermission";
-import { useEffect, useMemo } from "react";
+import { useMemo } from "react";
 import { Controller, useFormContext } from "react-hook-form";
 import useTriggerInput from "../../hooks/useTriggerInput";
 import { DownOutlined, UpOutlined } from "@ant-design/icons";
@@ -118,7 +118,7 @@ function PermissionList() {
               expandable={{
                 defaultExpandAllRows: true,
                 expandRowByClick: true,
-                expandIcon: ({ expanded, onExpand, record }) => {
+                expandIcon: ({ expanded, record }) => {
                   if (!record.children?.length) {
                     return <span className="inline-block w-7" />;
                   }
@@ -160,7 +160,7 @@ function PermissionList() {
                   const nextValue = nextSelectedKeys
                     .map((key) => permissionMap.get(String(key)))
                     .filter(Boolean)
-                    .map((_) => _.permissionID);
+                    .map((p) => (p as Permission).permissionID);
                   field.onChange(nextValue);
                   triggerSavePromptHandler();
                 },

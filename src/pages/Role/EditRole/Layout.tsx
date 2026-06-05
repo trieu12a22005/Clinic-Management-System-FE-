@@ -8,7 +8,6 @@ import { notifyError } from "@/utils/notify";
 
 function EditRoleLayout() {
   const hasInput = useStore((state) => state.behaviour?.form?.hasInput);
-  const x = useStore.getState();
 
   const navigate = useNavigate();
   const goToRoleListPage = useCallback(() => {
