@@ -1,36 +1,37 @@
-import { useMemo, useState } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import toast from 'react-hot-toast';
+import { useMemo, useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import toast from "react-hot-toast";
 import appointmentApi, {
   type AppointmentItem,
   type AppointmentStatus,
   type CreateAppointmentPayload,
-} from '@/apis/appointment';
-import facultyApi from '@/apis/faculty';
-import AppointmentTable from './components/AppointmentTable';
-import CreateAppointmentModal from './components/CreateAppointmentModal';
+} from "@/apis/appointment";
+import facultyApi from "@/apis/faculty";
+import AppointmentTable from "./components/AppointmentTable";
+import CreateAppointmentModal from "./components/CreateAppointmentModal";
+import { AxiosError } from "axios";
 
-type StatusFilter = 'all' | AppointmentStatus;
+type StatusFilter = "all" | AppointmentStatus;
 
 const getTodayDateString = () => {
   const today = new Date();
   const year = today.getFullYear();
-  const month = String(today.getMonth() + 1).padStart(2, '0');
-  const day = String(today.getDate()).padStart(2, '0');
+  const month = String(today.getMonth() + 1).padStart(2, "0");
+  const day = String(today.getDate()).padStart(2, "0");
 
   return `${year}-${month}-${day}`;
 };
 
 const getPatientName = (appointment: AppointmentItem) => {
-  const firstName = appointment.patient?.account?.firstName?.trim() ?? '';
-  const lastName = appointment.patient?.account?.lastName?.trim() ?? '';
-  return [firstName, lastName].filter(Boolean).join(' ').trim();
+  const firstName = appointment.patient?.account?.firstName?.trim() ?? "";
+  const lastName = appointment.patient?.account?.lastName?.trim() ?? "";
+  return [firstName, lastName].filter(Boolean).join(" ").trim();
 };
 
 const AppointmentPage = () => {
   const queryClient = useQueryClient();
-  const [search, setSearch] = useState('');
-  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [selectedDate, setSelectedDate] = useState(() => getTodayDateString());
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const {
@@ -38,37 +39,27 @@ const AppointmentPage = () => {
     isLoading: isAppointmentsLoading,
     isError: isAppointmentsError,
   } = useQuery({
-    queryKey: ['appointments', selectedDate],
+    queryKey: ["appointments", selectedDate],
     queryFn: () => appointmentApi.getAppointments({ scheduleDate: selectedDate }),
     meta: {
       suppressGlobalLoading: true,
     },
   });
 
-  const {
-    data: facultiesResponse,
-    isLoading: isFacultiesLoading,
-  } = useQuery({
-    queryKey: ['faculties'],
+  const { data: facultiesResponse, isLoading: isFacultiesLoading } = useQuery({
+    queryKey: ["faculties"],
     queryFn: () => facultyApi.getFaculties(),
   });
 
-  const appointments = useMemo(
-    () => appointmentsResponse?.appointments ?? [],
-    [appointmentsResponse]
-  );
+  const appointments = useMemo(() => appointmentsResponse?.appointments ?? [], [appointmentsResponse]);
 
-  const faculties = useMemo(
-    () => facultiesResponse?.faculties ?? [],
-    [facultiesResponse]
-  );
+  const faculties = useMemo(() => facultiesResponse?.faculties ?? [], [facultiesResponse]);
 
   const filteredAppointments = useMemo(() => {
     const normalizedSearch = search.trim().toLowerCase();
 
     return appointments.filter((appointment) => {
-      const matchesStatus =
-        statusFilter === 'all' || appointment.status === statusFilter;
+      const matchesStatus = statusFilter === "all" || appointment.status === statusFilter;
 
       if (!matchesStatus) {
         return false;
@@ -87,7 +78,7 @@ const AppointmentPage = () => {
         appointment.depositStatus,
       ]
         .filter(Boolean)
-        .join(' ')
+        .join(" ")
         .toLowerCase();
 
       return haystack.includes(normalizedSearch);
@@ -95,17 +86,18 @@ const AppointmentPage = () => {
   }, [appointments, search, statusFilter]);
 
   const createAppointmentMutation = useMutation({
-    mutationFn: (payload: CreateAppointmentPayload) =>
-      appointmentApi.createAppointment(payload),
+    mutationFn: (payload: CreateAppointmentPayload) => appointmentApi.createAppointment(payload),
     onSuccess: (response) => {
-      queryClient.invalidateQueries({ queryKey: ['appointments'] });
+      queryClient.invalidateQueries({ queryKey: ["appointments"] });
       setIsCreateModalOpen(false);
-      toast.success(response.message ?? 'Tạo lịch hẹn thành công');
+      toast.success(response.message ?? "Tạo lịch hẹn thành công");
     },
     onError: (error) => {
-      toast.error(
-        error instanceof Error ? error.message : 'Tạo lịch hẹn thất bại'
-      );
+      if (error instanceof AxiosError && error.response?.data?.message && error.status === 400) {
+        toast.error(error.response.data.message);
+        return;
+      }
+      toast.error(error instanceof Error ? error.message : "Tạo lịch hẹn thất bại");
     },
   });
 
@@ -125,9 +117,7 @@ const AppointmentPage = () => {
         <div className="flex flex-col gap-4 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm md:flex-row md:items-center md:justify-between">
           <div className="space-y-1">
             <h1 className="text-2xl font-bold text-gray-900">Danh sách lịch hẹn</h1>
-            <p className="text-sm text-gray-500">
-              Quản lý thông tin đặt lịch, tạo mới và xóa lịch hẹn nhanh.
-            </p>
+            <p className="text-sm text-gray-500">Quản lý thông tin đặt lịch, tạo mới và xóa lịch hẹn nhanh.</p>
           </div>
           <button
             onClick={() => setIsCreateModalOpen(true)}
@@ -169,7 +159,6 @@ const AppointmentPage = () => {
         onClose={() => setIsCreateModalOpen(false)}
         onSubmit={(payload) => createAppointmentMutation.mutate(payload)}
       />
-
     </div>
   );
 };
