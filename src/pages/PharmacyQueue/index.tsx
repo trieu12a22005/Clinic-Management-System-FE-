@@ -105,7 +105,7 @@ const PharmacyQueue = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#f6f8fb] py-8 font-sans text-gray-800">
+    <div className="min-h-screen py-8 font-sans text-gray-800">
       <div className="mx-auto flex max-w-[1400px] flex-col gap-6 px-4 sm:px-6 lg:px-8">
         <div className="space-y-1">
           <h1 className="text-2xl font-bold text-gray-900">Hàng đợi phát thuốc</h1>

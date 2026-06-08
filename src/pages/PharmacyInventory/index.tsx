@@ -308,7 +308,7 @@ const PharmacyInventory = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#f6f8fb] py-8 font-sans text-gray-800">
+    <div className="min-h-screen py-8 font-sans text-gray-800">
       <div className="mx-auto flex max-w-[1400px] flex-col gap-6 px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="flex flex-wrap items-center justify-between gap-4">

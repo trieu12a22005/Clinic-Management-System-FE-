@@ -3,7 +3,7 @@ import Sider from "antd/es/layout/Sider";
 import { LeftOutlined, RightOutlined } from "@ant-design/icons";
 import MenuApp from "../menu/Menu";
 import { useState } from "react";
-export const main = "#3a2d7c";
+export const main = "#151a37";
 const btnStyle = {
   width: 40,
   height: 40,

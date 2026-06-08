@@ -118,7 +118,7 @@ const PrescriptionDetail = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#f6f8fb] py-8 font-sans text-gray-800">
+      <div className="min-h-screen py-8 font-sans text-gray-800">
         <div className="mx-auto flex max-w-[1200px] flex-col gap-6 px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-center py-20">
             <div className="h-8 w-8 animate-spin rounded-full border-2 border-blue-600 border-t-transparent"></div>
@@ -131,7 +131,7 @@ const PrescriptionDetail = () => {
 
   if (!prescriptionData) {
     return (
-      <div className="min-h-screen bg-[#f6f8fb] py-8 font-sans text-gray-800">
+      <div className="min-h-screen py-8 font-sans text-gray-800">
         <div className="mx-auto flex max-w-[1200px] flex-col gap-6 px-4 sm:px-6 lg:px-8">
           <div className="rounded-2xl border border-gray-200 bg-white p-8 text-center">
             <p className="text-gray-500">Không tìm thấy đơn thuốc</p>
@@ -148,7 +148,7 @@ const PrescriptionDetail = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#f6f8fb] py-8 font-sans text-gray-800">
+    <div className="min-h-screen py-8 font-sans text-gray-800">
       <div className="mx-auto flex max-w-[1200px] flex-col gap-6 px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="flex items-center gap-4">

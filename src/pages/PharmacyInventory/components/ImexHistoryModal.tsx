@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { DatePicker } from 'antd';
+import dayjs from 'dayjs';
 import { getImexLogs, type ImexType, type ImexLogItem } from '../../../apis/medicineImex';
 import ImexDetailModal from './ImexDetailModal';
 
@@ -57,21 +59,29 @@ const SkeletonRow = () => (
 export const ImexHistoryModal = ({ isOpen, onClose }: ImexHistoryModalProps) => {
   const [page, setPage] = useState(1);
   const [typeFilter, setTypeFilter] = useState<ImexType | ''>('');
-  const [dateFrom, setDateFrom] = useState('');
-  const [dateTo, setDateTo] = useState('');
+  const [dateFrom, setDateFrom] = useState<dayjs.Dayjs | null>(null);
+  const [dateTo, setDateTo] = useState<dayjs.Dayjs | null>(null);
   const [selectedImexId, setSelectedImexId] = useState<string | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ['imexLogs', { page, type: typeFilter, from: dateFrom, to: dateTo }],
+    queryKey: [
+      'imexLogs',
+      {
+        page,
+        type: typeFilter,
+        from: dateFrom ? dateFrom.format('YYYY-MM-DD') : '',
+        to: dateTo ? dateTo.format('YYYY-MM-DD') : '',
+      },
+    ],
     queryFn: async () => {
       const params: Parameters<typeof getImexLogs>[0] = {
         page,
         pageSize: PAGE_SIZE,
       };
       if (typeFilter) params.type = typeFilter;
-      if (dateFrom) params.from = new Date(dateFrom).toISOString();
-      if (dateTo) params.to = new Date(dateTo + 'T23:59:59').toISOString();
+      if (dateFrom) params.from = new Date(dateFrom.format('YYYY-MM-DD')).toISOString();
+      if (dateTo) params.to = new Date(dateTo.format('YYYY-MM-DD') + 'T23:59:59').toISOString();
 
       const response = await getImexLogs(params);
       return response;
@@ -84,8 +94,8 @@ export const ImexHistoryModal = ({ isOpen, onClose }: ImexHistoryModalProps) => 
 
   const handleResetFilters = () => {
     setTypeFilter('');
-    setDateFrom('');
-    setDateTo('');
+    setDateFrom(null);
+    setDateTo(null);
     setPage(1);
   };
 
@@ -134,27 +144,29 @@ export const ImexHistoryModal = ({ isOpen, onClose }: ImexHistoryModalProps) => 
 
               <div className="flex items-center gap-2">
                 <label className="text-sm text-gray-600">Từ:</label>
-                <input
-                  type="date"
+                <DatePicker
                   value={dateFrom}
-                  onChange={(e) => {
-                    setDateFrom(e.target.value);
+                  onChange={(date) => {
+                    setDateFrom(date);
                     setPage(1);
                   }}
-                  className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                  format="DD/MM/YYYY"
+                  placeholder="Chọn ngày"
+                  className="w-36"
                 />
               </div>
 
               <div className="flex items-center gap-2">
                 <label className="text-sm text-gray-600">Đến:</label>
-                <input
-                  type="date"
+                <DatePicker
                   value={dateTo}
-                  onChange={(e) => {
-                    setDateTo(e.target.value);
+                  onChange={(date) => {
+                    setDateTo(date);
                     setPage(1);
                   }}
-                  className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                  format="DD/MM/YYYY"
+                  placeholder="Chọn ngày"
+                  className="w-36"
                 />
               </div>
 
