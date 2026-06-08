@@ -1,5 +1,19 @@
 import { useState } from "react";
-import { Table, Input, Button, Modal, Form, Tag, Tooltip, Popconfirm, Spin, Alert, Typography, Space, Badge } from "antd";
+import {
+  Table,
+  Input,
+  Button,
+  Modal,
+  Form,
+  Tag,
+  Tooltip,
+  Popconfirm,
+  Spin,
+  Alert,
+  Typography,
+  Space,
+  Badge,
+} from "antd";
 import {
   EditOutlined,
   DeleteOutlined,
@@ -114,9 +128,7 @@ export const ConfigTab = () => {
     {
       title: "Ngày áp dụng kế tiếp",
       width: 180,
-      render: (_: unknown, record: SystemConfigItem) => (
-        <PendingBadge configKey={record.key} />
-      ),
+      render: (_: unknown, record: SystemConfigItem) => <PendingBadge configKey={record.key} />,
     },
     {
       title: "Thao tác",
@@ -154,6 +166,16 @@ export const ConfigTab = () => {
 
   return (
     <div>
+      {/* Info banner về cơ chế ngày mai */}
+      <Alert
+        type="info"
+        showIcon
+        style={{ marginBottom: 16 }}
+        className="rounded-xl"
+        message="Lưu ý: Giá trị mới sau khi cập nhật sẽ chỉ có hiệu lực từ ngày hôm sau."
+        description="Hóa đơn và báo cáo hôm nay vẫn sử dụng giá hiện tại. Nhấn biểu tượng đồng hồ để xem lịch sử thay đổi của từng cấu hình."
+        closable
+      />
       <div className="flex items-center justify-between mb-6 gap-3">
         <Input
           prefix={<SearchOutlined className="text-gray-400" />}
@@ -172,16 +194,6 @@ export const ConfigTab = () => {
           </Button>
         </Space>
       </div>
-
-      {/* Info banner về cơ chế ngày mai */}
-      <Alert
-        type="info"
-        showIcon
-        className="mb-4 rounded-xl"
-        message="Lưu ý: Giá trị mới sau khi cập nhật sẽ chỉ có hiệu lực từ ngày hôm sau."
-        description="Hóa đơn và báo cáo hôm nay vẫn sử dụng giá hiện tại. Nhấn biểu tượng đồng hồ để xem lịch sử thay đổi của từng cấu hình."
-        closable
-      />
 
       {isError ? (
         <Alert type="error" message="Không thể tải cấu hình hệ thống" showIcon />
