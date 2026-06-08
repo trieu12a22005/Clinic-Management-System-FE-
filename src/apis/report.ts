@@ -20,6 +20,10 @@ class ReportApi {
         const response = await apiClient.get('/admin/report/monthly-revenue', { params: { month, year } });
         return response.data;
     }
+    async getBM5_2(month: number, year: number) {
+        const response = await apiClient.get('/admin/report/medicine-usage', { params: { month, year } });
+        return response.data;
+    }
 }
 
 const reportApi = new ReportApi();
