@@ -23,11 +23,12 @@ const BM1 = () => {
     return (
         <div>
             {/* Filter bar */}
-            <div className="bg-gradient-to-r from-gray-800 to-gray-900 px-6 py-4 flex items-center justify-between">
+            <div className="bg-gradient-to-r from-gray-800 to-gray-900 print:bg-none print:border-b px-6 py-4 flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                    <h2 className="text-white font-bold text-lg">Danh Sách Khám Bệnh</h2>
+                    <span className="bg-indigo-500 text-white text-xs font-bold px-3 py-1 rounded-full print:hidden">BM1</span>
+                    <h2 className="text-white print:text-black font-bold text-lg">Danh Sách Khám Bệnh</h2>
                 </div>
-                <div className="flex items-center gap-2 bg-white/10 rounded-lg px-3 py-1.5">
+                <div className="flex items-center gap-2 bg-white/10 rounded-lg px-3 py-1.5 print:hidden">
                     <CalendarOutlined className="text-white text-sm" />
                     <span className="text-white text-xs font-medium">Ngày khám:</span>
                     <DatePicker
@@ -42,11 +43,13 @@ const BM1 = () => {
 
             {/* Stats strip */}
             {report && (
-                <div className="flex items-center gap-6 px-6 py-3 bg-blue-50 border-b border-blue-100 text-sm">
-
-                    <span className="text-gray-500">
-                        Số bệnh nhân: <strong className="text-indigo-700">{report.totalPatients}</strong>
-                        <span className="text-gray-400"> / {report.maxPatientsLimit}</span>
+                <div className="flex items-center gap-6 px-6 py-3 bg-blue-50 border-b border-blue-100 print:border-none print:bg-transparent text-sm">
+                    <span className="text-gray-500 print:text-black">
+                        Ngày: <strong className="text-blue-700 print:text-black">{dayjs(report.date).format("DD/MM/YYYY")}</strong>
+                    </span>
+                    <span className="text-gray-500 print:text-black">
+                        Số bệnh nhân: <strong className="text-indigo-700 print:text-black">{report.totalPatients}</strong>
+                        <span className="text-gray-400 print:text-black"> / {report.maxPatientsLimit}</span>
                     </span>
                     {report.totalPatients >= report.maxPatientsLimit && (
                         <Tag color="red">Đã đạt giới hạn</Tag>

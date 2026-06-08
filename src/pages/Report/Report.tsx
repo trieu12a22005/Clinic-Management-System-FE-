@@ -7,10 +7,14 @@ import BM5_2 from "./components/BM5_2";
 
 const TABS = [
     { key: "bm1", label: "BM1", title: "Danh Sách Khám Bệnh", color: "bg-indigo-500" },
+    { key: "bm5_1", label: "BM5.1", title: "Báo Cáo Doanh Thu", color: "bg-teal-500" },
+    { key: "bm5_2", label: "BM5.2", title: "Báo Cáo Sử Dụng Thuốc", color: "bg-rose-500" },
 ];
 
 const COMPONENTS: Record<string, ReactElement> = {
     bm1: <BM1 />,
+    bm5_1: <BM5_1 />,
+    bm5_2: <BM5_2 />,
 };
 
 const Report = () => {
