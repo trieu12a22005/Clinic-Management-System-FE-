@@ -163,7 +163,18 @@ const ManageAccount: React.FC = () => {
                     </Space>
                 </div>
 
-                <Table columns={columns} dataSource={Array.isArray(accountsQuery.data) ? accountsQuery.data : []} loading={accountsQuery.isLoading} pagination={{ pageSize: 8 }} rowKey={(record) => record.accountID?.toString() || record.key || record.email || Math.random().toString()} />
+                <Table
+                    columns={columns}
+                    dataSource={
+                        (Array.isArray(accountsQuery.data) ? accountsQuery.data : []).filter((acc: any) => {
+                            const roleName = acc.role?.roleName || acc.roleName || acc.role || '';
+                            return roleName && roleName.toLowerCase() !== 'unknown';
+                        })
+                    }
+                    loading={accountsQuery.isLoading}
+                    pagination={{ pageSize: 8 }}
+                    rowKey={(record) => record.accountID?.toString() || record.key || record.email || Math.random().toString()}
+                />
 
                 <Modal
                     title={<span className="text-lg font-semibold">{editingKey ? "Chỉnh sửa tài khoản" : "Tạo tài khoản mới"}</span>}
