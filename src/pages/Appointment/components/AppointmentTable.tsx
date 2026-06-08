@@ -43,25 +43,6 @@ const depositStyles: Record<AppointmentDepositStatus, { label: string; className
   },
 };
 
-const formatDateTime = (value?: string) => {
-  if (!value) {
-    return "--";
-  }
-
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) {
-    return value;
-  }
-
-  return date.toLocaleString("vi-VN", {
-    hour: "2-digit",
-    minute: "2-digit",
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-  });
-};
-
 const getPatientName = (appointment: AppointmentItem) => {
   const firstName = appointment.patient?.account?.firstName?.trim() ?? "";
   const lastName = appointment.patient?.account?.lastName?.trim() ?? "";
@@ -324,7 +305,7 @@ const AppointmentTable = ({
         </table>
       </div>
 
-      <div className="hidden">
+      <div className="absolute top-0 left-[-9999px] invisible print:visible print:static print:left-0">
         <ReceiptTemplate ref={receiptRef} data={receiptData} />
       </div>
     </div>

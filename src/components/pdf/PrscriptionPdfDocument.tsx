@@ -53,7 +53,7 @@ const PrescriptionPdfDocument: React.FC<Props> = ({ data }) => {
   return (
     <Document>
       <Page size="A4" style={styles.page}>
-        <Text style={styles.title}>Phiếu khám bệnh {data.examineDisplayID ? `- ${data.examineDisplayID}` : ''}</Text>
+        <Text style={styles.title}>Phiếu khám bệnh {data.examineDisplayID ? `- Mã đơn thuốc: ${data.examineDisplayID}` : ''}</Text>
 
         <View style={styles.section}>
           <View style={styles.row}>
