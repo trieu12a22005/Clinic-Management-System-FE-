@@ -86,11 +86,10 @@ const TimetableList = ({ accountID }: { accountID: string }) => {
                             <button
                                 key={tab}
                                 onClick={() => setActiveTab(tab)}
-                                className={`px-6 sm:px-10 py-2.5 rounded-full text-sm font-bold transition-all duration-300 ease-out ${
-                                    activeTab === tab
-                                        ? 'bg-white text-indigo-600 shadow-md transform scale-105'
-                                        : 'text-slate-500 hover:text-indigo-500 hover:bg-slate-200/50'
-                                }`}
+                                className={`px-6 sm:px-10 py-2.5 rounded-full text-sm font-bold transition-all duration-300 ease-out ${activeTab === tab
+                                    ? 'bg-white text-indigo-600 shadow-md transform scale-105'
+                                    : 'text-slate-500 hover:text-indigo-500 hover:bg-slate-200/50'
+                                    }`}
                             >
                                 LỊCH {tab}
                             </button>
@@ -102,7 +101,7 @@ const TimetableList = ({ accountID }: { accountID: string }) => {
                 <div className={`transition-all duration-500 overflow-hidden ${activeTab === 'TOÀN BỆNH VIỆN' ? 'max-h-32 mb-8 opacity-100' : 'max-h-0 opacity-0'}`}>
                     <HasPermission requiredPermissions={["faculty.view", "faculty.manage"]}>
                         <FacultyFilter
-                        faculties={faculties}
+                            faculties={faculties}
                             activeFacultyId={activeFacultyId}
                             onSelectFaculty={setActiveFacultyId}
                         />
@@ -122,7 +121,7 @@ const TimetableList = ({ accountID }: { accountID: string }) => {
                                         <th key={day.key} className="relative p-4 border-r border-slate-200 last:border-r-0 w-[12%] text-center group">
                                             <div className="font-extrabold text-slate-700 uppercase tracking-wide">{day.label}</div>
                                             <div className="text-xs font-medium text-slate-400 mt-1">{day.date}</div>
-                                            
+
                                             {/* Minimal Dropdown trigger on hover */}
                                             <div className="absolute right-2 top-3 opacity-0 group-hover:opacity-100 transition-opacity">
                                                 <Dropdown
@@ -175,7 +174,7 @@ const TimetableList = ({ accountID }: { accountID: string }) => {
                                                             <div className="h-full min-h-[140px] bg-gradient-to-br from-blue-50 to-indigo-50/50 rounded-xl p-4 border border-indigo-100/60 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 cursor-pointer flex flex-col group/card">
                                                                 <div className="flex-1">
                                                                     <div className="inline-flex items-center justify-center px-2.5 py-1 bg-indigo-100/80 text-indigo-700 text-[11px] font-extrabold uppercase tracking-wide rounded-md mb-3 border border-indigo-200/50">
-                                                                        {entry.note || 'Ca Khám'}
+                                                                        {entry.note || ''}
                                                                     </div>
                                                                 </div>
                                                                 <div className="mt-auto pt-3 border-t border-indigo-100/80 flex items-center gap-2">
@@ -183,7 +182,7 @@ const TimetableList = ({ accountID }: { accountID: string }) => {
                                                                         {entry.account.firstName?.charAt(0).toUpperCase() || 'BS'}
                                                                     </div>
                                                                     <div className="flex flex-col overflow-hidden">
-                                                                        <span className="text-[10px] text-slate-500 font-bold uppercase">Bác sĩ</span>
+                                                                        <span className="text-[10px] text-slate-500 font-bold uppercase">{entry.account.role?.roleDescription}</span>
                                                                         <span className="text-sm font-semibold text-slate-800 truncate group-hover/card:text-indigo-700 transition-colors">
                                                                             {entry.account.firstName} {entry.account.lastName}
                                                                         </span>

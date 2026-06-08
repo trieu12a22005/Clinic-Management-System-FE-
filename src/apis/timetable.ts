@@ -10,6 +10,7 @@ export interface TimetableAccount {
   role?: {
     roleID: string;
     roleName: string;
+    roleDescription?: string;
   };
   avatarUrl?: string;
   DisplayID?: string;

@@ -11,7 +11,7 @@ export const UseExamination = (params: EnterTicketParams) => {
             return mapEnterTicketRows(res.data);
         },
         enabled: !!params.roomID,
-        staleTime: 0, // Ghi đè cấu hình 5 phút của global để luôn lấy dữ liệu mới nhất
+        staleTime: 0,
     });
     return {
         examinations: query.data,
