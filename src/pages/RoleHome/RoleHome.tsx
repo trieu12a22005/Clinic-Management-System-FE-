@@ -134,6 +134,7 @@ const RoleHome = () => {
       path: "/schedule",
       requiredPermissions: ["timetable.add_new", "timetable.update", "timetable.delete"],
     },
+
   ];
 
   // Lọc tính năng dựa trên permissions của user (nếu requiredPermissions rỗng thì ai cũng xem được)

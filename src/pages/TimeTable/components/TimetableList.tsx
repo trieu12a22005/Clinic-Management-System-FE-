@@ -4,6 +4,7 @@ import FacultyService from "@/services/facultyService";
 import FacultyFilter from "./FacultyFilter";
 import { Dropdown } from "antd";
 import { MoreOutlined } from "@ant-design/icons";
+import HasPermission from "@/components/HasPermission";
 
 export interface WeekDay {
     key: string;
@@ -97,13 +98,15 @@ const TimetableList = ({ accountID }: { accountID: string }) => {
                     </div>
                 </div>
 
-                {/* Faculty Filter */}
+                {/* Faculty Filter — chỉ hiện khi có quyền xem faculty */}
                 <div className={`transition-all duration-500 overflow-hidden ${activeTab === 'TOÀN BỆNH VIỆN' ? 'max-h-32 mb-8 opacity-100' : 'max-h-0 opacity-0'}`}>
-                    <FacultyFilter
-                    faculties={faculties}
-                        activeFacultyId={activeFacultyId}
-                        onSelectFaculty={setActiveFacultyId}
-                    />
+                    <HasPermission requiredPermissions={["faculty.view", "faculty.manage"]}>
+                        <FacultyFilter
+                        faculties={faculties}
+                            activeFacultyId={activeFacultyId}
+                            onSelectFaculty={setActiveFacultyId}
+                        />
+                    </HasPermission>
                 </div>
 
                 {/* Table Area */}

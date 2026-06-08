@@ -2,10 +2,24 @@ import { apiClient } from './axios';
 
 export interface RoomOption {
   roomID: string;
-  roomName: string;
+  roomName: string | null;
   roomType?: string;
   status?: string;
-  facultyID?: string;
+  FacultyID?: string;
+  faculty?: { facultyID: string; facultyName: string };
+}
+
+export interface CreateRoomRequest {
+  roomName: string;
+  roomType: string;
+  FacultyID?: string;
+}
+
+export interface UpdateRoomRequest {
+  roomName?: string;
+  roomType?: string;
+  FacultyID?: string;
+  status?: 'ACTIVE' | 'INACTIVE';
 }
 
 type RoomsApiResponse = {
@@ -15,28 +29,16 @@ type RoomsApiResponse = {
 };
 
 const normalizeRoom = (item: unknown): RoomOption | null => {
-  if (!item || typeof item !== 'object') {
-    return null;
-  }
-
-  const room = item as {
-    roomID?: unknown;
-    roomName?: unknown;
-    roomType?: unknown;
-    status?: unknown;
-    facultyID?: unknown;
-  };
-
-  if (typeof room.roomID !== 'string' || typeof room.roomName !== 'string') {
-    return null;
-  }
-
+  if (!item || typeof item !== 'object') return null;
+  const room = item as Record<string, unknown>;
+  if (typeof room.roomID !== 'string') return null;
   return {
     roomID: room.roomID,
-    roomName: room.roomName,
+    roomName: typeof room.roomName === 'string' ? room.roomName : null,
     roomType: typeof room.roomType === 'string' ? room.roomType : undefined,
     status: typeof room.status === 'string' ? room.status : undefined,
-    facultyID: typeof room.facultyID === 'string' ? room.facultyID : undefined,
+    FacultyID: typeof room.FacultyID === 'string' ? room.FacultyID : undefined,
+    faculty: room.faculty as RoomOption['faculty'],
   };
 };
 
@@ -58,41 +60,42 @@ const extractRooms = (response: RoomsApiResponse | unknown): RoomOption[] => {
 };
 
 class RoomApi {
+  /** Lấy tất cả phòng */
   async getRooms(): Promise<RoomOption[]> {
-    const response = await apiClient.get<RoomsApiResponse>('/admin/room');
+    const response = await apiClient.get<RoomsApiResponse>('/admin/rooms');
     return extractRooms(response.data);
   }
 
+  /** Lấy phòng theo khoa */
   async getRoomsByFaculty(facultyID: string): Promise<RoomOption[]> {
-    const endpoints = ['/admin/rooms', '/admin/room'];
+    const response = await apiClient.get<RoomsApiResponse>(`/admin/rooms/faculty/${facultyID}`);
+    return extractRooms(response.data);
+  }
 
-    for (const endpoint of endpoints) {
-      try {
-        const response = await apiClient.get<RoomsApiResponse>(endpoint, {
-          params: { facultyID },
-        });
-        return extractRooms(response.data);
-      } catch (error) {
-        const status =
-          typeof error === 'object' &&
-          error !== null &&
-          'response' in error &&
-          typeof error.response === 'object' &&
-          error.response !== null &&
-          'status' in error.response
-            ? error.response.status
-            : undefined;
+  /** Tạo phòng mới */
+  async createRoom(data: CreateRoomRequest): Promise<{ room: RoomOption }> {
+    const response = await apiClient.post('/admin/rooms', data);
+    return response.data;
+  }
 
-        if (status !== 404) {
-          throw error;
-        }
-      }
-    }
+  /** Cập nhật phòng */
+  async updateRoom(id: string, data: UpdateRoomRequest): Promise<{ message: string; room: RoomOption }> {
+    const response = await apiClient.patch(`/admin/rooms/${id}`, data);
+    return response.data;
+  }
 
-    return [];
+  /** Xóa phòng */
+  async deleteRoom(id: string): Promise<{ message: string }> {
+    const response = await apiClient.post(`/admin/rooms/${id}`);
+    return response.data;
+  }
+
+  /** Xóa nhiều phòng */
+  async deleteManyRooms(roomIds: string[]): Promise<{ message: string; deletedCount: number }> {
+    const response = await apiClient.post('/admin/rooms/delete-many', { roomIds });
+    return response.data;
   }
 }
 
 const roomApi = new RoomApi();
-
 export default roomApi;

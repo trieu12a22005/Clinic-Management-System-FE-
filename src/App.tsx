@@ -98,7 +98,7 @@ function App() {
             <Route
               element={
                 <PermissionRoute
-                  requiredPermissions={["timetable.add_new", "timetable.update", "timetable.delete"]}
+                  requiredPermissions={["timetable.add_new", "timetable.update", "timetable.delete", "faculty.view", "faculty.manage"]}
                   featureName="Xếp lịch làm việc"
                 />
               }

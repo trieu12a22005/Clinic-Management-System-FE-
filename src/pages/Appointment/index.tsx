@@ -10,6 +10,7 @@ import facultyApi from "@/apis/faculty";
 import AppointmentTable from "./components/AppointmentTable";
 import CreateAppointmentModal from "./components/CreateAppointmentModal";
 import { AxiosError } from "axios";
+import { useCheckPermission } from "@/hooks/useCheckPermission";
 
 type StatusFilter = "all" | AppointmentStatus;
 
@@ -34,6 +35,8 @@ const AppointmentPage = () => {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [selectedDate, setSelectedDate] = useState(() => getTodayDateString());
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const { hasPermission } = useCheckPermission();
+  const canViewFaculty = hasPermission(["faculty.view", "faculty.manage"]);
   const {
     data: appointmentsResponse,
     isLoading: isAppointmentsLoading,
@@ -49,6 +52,8 @@ const AppointmentPage = () => {
   const { data: facultiesResponse, isLoading: isFacultiesLoading } = useQuery({
     queryKey: ["faculties"],
     queryFn: () => facultyApi.getFaculties(),
+    // Chỉ fetch khi có quyền xem faculty — tránh 403
+    enabled: canViewFaculty,
   });
 
   const appointments = useMemo(() => appointmentsResponse?.appointments ?? [], [appointmentsResponse]);
@@ -119,16 +124,18 @@ const AppointmentPage = () => {
             <h1 className="text-2xl font-bold text-gray-900">Danh sách lịch hẹn</h1>
             <p className="text-sm text-gray-500">Quản lý thông tin đặt lịch, tạo mới và xóa lịch hẹn nhanh.</p>
           </div>
-          <button
-            onClick={() => setIsCreateModalOpen(true)}
-            disabled={isFacultiesLoading}
-            className="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-blue-400"
-          >
-            <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 5v14M5 12h14" />
-            </svg>
-            Tạo lịch hẹn
-          </button>
+          {canViewFaculty && (
+            <button
+              onClick={() => setIsCreateModalOpen(true)}
+              disabled={isFacultiesLoading}
+              className="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-blue-400"
+            >
+              <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 5v14M5 12h14" />
+              </svg>
+              Tạo lịch hẹn
+            </button>
+          )}
         </div>
 
         {isAppointmentsError ? (

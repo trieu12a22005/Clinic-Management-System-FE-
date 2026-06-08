@@ -1,44 +1,71 @@
 import { Tabs, Typography } from "antd";
-import { SettingOutlined, AppstoreOutlined, ExperimentOutlined, MedicineBoxOutlined } from "@ant-design/icons";
+import {
+  SettingOutlined, AppstoreOutlined, ExperimentOutlined,
+  MedicineBoxOutlined, BankOutlined,
+} from "@ant-design/icons";
 import { ConfigTab } from "./components/ConfigTab";
 import { UnitTab } from "./components/UnitTab";
 import { UsageTab } from "./components/UsageTab";
 import { DiseaseTab } from "./components/DiseaseTab";
+import { FacultyRoomTab } from "./components/FacultyRoomTab";
 import HasPermission from "@/components/HasPermission";
+import { useCheckPermission } from "@/hooks/useCheckPermission";
 
 const { Title } = Typography;
-// AI model quèn code ra cái này đây. Không phải claude sonnet gì gì đó đâu.
-const configTabs = [
-  {
-    key: "configs",
-    icon: <SettingOutlined />,
-    text: "Cấu hình chung",
-    content: <ConfigTab />,
-    permissions: ["system.manage"],
-  },
-  {
-    key: "units",
-    icon: <AppstoreOutlined />,
-    text: "Đơn vị thuốc",
-    content: <UnitTab />,
-    permissions: ["medicine.view", "medicine.add", "medicine.update", "imex.create", "imex.update", "ticket.update"],
-  },
-  {
-    key: "usages",
-    icon: <ExperimentOutlined />,
-    text: "Cách dùng thuốc",
-    content: <UsageTab />,
-    permissions: ["medicine.view", "medicine.add", "medicine.update", "imex.create", "imex.update", "ticket.update"],
-  },
-  {
-    key: "diseases",
-    icon: <MedicineBoxOutlined />,
-    text: "Loại bệnh (ICD-10)",
-    content: <DiseaseTab />,
-    permissions: ["ticket.update", "system.manage"],
-  },
-];
+
 const SystemConfig = () => {
+  const { hasPermission } = useCheckPermission();
+
+  // Tabs tĩnh — luôn hiện (bảo vệ nội dung bên trong bằng HasPermission)
+  const staticTabs = [
+    {
+      key: "configs",
+      icon: <SettingOutlined />,
+      text: "Cấu hình chung",
+      content: <ConfigTab />,
+      permissions: ["system.manage"],
+    },
+    {
+      key: "units",
+      icon: <AppstoreOutlined />,
+      text: "Đơn vị thuốc",
+      content: <UnitTab />,
+      permissions: ["medicine.view", "medicine.add", "medicine.update", "imex.create", "imex.update", "ticket.update"],
+    },
+    {
+      key: "usages",
+      icon: <ExperimentOutlined />,
+      text: "Cách dùng thuốc",
+      content: <UsageTab />,
+      permissions: ["medicine.view", "medicine.add", "medicine.update", "imex.create", "imex.update", "ticket.update"],
+    },
+    {
+      key: "diseases",
+      icon: <MedicineBoxOutlined />,
+      text: "Loại bệnh (ICD-10)",
+      content: <DiseaseTab />,
+      permissions: ["ticket.update", "system.manage"],
+    },
+  ];
+
+  // Tab Khoa & Phòng — chỉ xuất hiện khi có faculty.manage HOẶC room.manage
+  const showFacultyRoomTab = hasPermission(["faculty.manage", "room.manage", "faculty.view", "room.view"]);
+
+  const allTabs = [
+    ...staticTabs,
+    ...(showFacultyRoomTab
+      ? [
+          {
+            key: "faculty-room",
+            icon: <BankOutlined />,
+            text: "Khoa & Phòng",
+            content: <FacultyRoomTab />,
+            permissions: [] as string[], // nội dung tự bảo vệ bằng HasPermission bên trong
+          },
+        ]
+      : []),
+  ];
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* ── Header ── */}
@@ -64,9 +91,10 @@ const SystemConfig = () => {
           defaultActiveKey="configs"
           type="card"
           size="large"
-          items={configTabs.map(({ key, icon, text, content, permissions }) => {
+          items={allTabs.map(({ key, icon, text, content, permissions }) => {
+            let body = content;
             if (permissions && permissions.length > 0) {
-              content = (
+              body = (
                 <HasPermission
                   requiredPermissions={permissions}
                   fallback={<>Bạn không có quyền truy cập chức năng này</>}
@@ -83,7 +111,7 @@ const SystemConfig = () => {
                   {text}
                 </span>
               ),
-              children: <div className="mt-4">{content}</div>,
+              children: <div className="mt-4">{body}</div>,
             };
           })}
         />
