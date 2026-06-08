@@ -35,7 +35,7 @@ const ReceiptTemplate = React.forwardRef<HTMLDivElement, ReceiptTemplateProps>(
         {/* Header */}
         <div className="mb-6 border-b-2 border-gray-900 pb-4 text-center">
           <h1 className="text-xl font-bold uppercase tracking-wider text-gray-900">
-            PHÒNG KHÁM ĐA KHOA ANTIGRAVITY
+            PHÒNG KHÁM ĐA KHOA QUỐC TẾ
           </h1>
           <p className="text-xs text-gray-500">
             Địa chỉ: 123 Đường Lý Thường Kiệt, Quận 10, TP. Hồ Chí Minh
