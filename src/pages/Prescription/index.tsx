@@ -214,7 +214,7 @@ const Prescription: React.FC = () => {
         console.log('Lưu phiếu khám thành công:', response);
         toast.success('Lưu phiếu khám thành công');
         setIsSaved(true);
-        const newDisplayID = response?.data?.examineDisplayID || response?.examineDisplayID;
+        const newDisplayID = response?.examine?.examineDisplayID || response?.examineDisplayID;
         if (newDisplayID) {
           setExamineDisplayID(newDisplayID);
         }
@@ -452,7 +452,7 @@ const Prescription: React.FC = () => {
             >
               Hủy
             </Button>
-            <Button type="primary" htmlType="submit">
+            <Button type="primary" htmlType="submit" disabled={isSaved}>
               Lưu phiếu khám
             </Button>
             <Button onClick={handleExportPdf}>In PDF</Button>
