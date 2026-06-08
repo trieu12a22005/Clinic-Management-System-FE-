@@ -1,9 +1,9 @@
 import React from 'react';
-import { Document,Page,Text,View } from '@react-pdf/renderer';
+import { Document, Page, Text, View } from '@react-pdf/renderer';
 import type { PrescriptionPdfData } from '@/types/Prescription';
 import { stylesPDF } from './styles';
 import './pdfFont';
-const styles = stylesPDF; 
+const styles = stylesPDF;
 type Props = {
   data: PrescriptionPdfData;
 };
@@ -49,11 +49,11 @@ const BlockField = ({
 );
 
 const PrescriptionPdfDocument: React.FC<Props> = ({ data }) => {
-    console.log("data",data);
+  console.log("data", data);
   return (
     <Document>
       <Page size="A4" style={styles.page}>
-        <Text style={styles.title}>Phiếu khám bệnh</Text>
+        <Text style={styles.title}>Phiếu khám bệnh {data.examineDisplayID ? `- ${data.examineDisplayID}` : ''}</Text>
 
         <View style={styles.section}>
           <View style={styles.row}>

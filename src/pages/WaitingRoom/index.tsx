@@ -68,9 +68,12 @@ const WaitingRoomContent = ({
   roomID: string;
   timetable: { roomID: string; room?: { roomName?: string | null }; account?: { firstName?: string; lastName?: string } };
 }) => {
+  const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
+
   const { examinations } = UseExamination({
     roomID,
     status: "pending",
+    date: today,
     page: 1,
     limit: 10,
   });

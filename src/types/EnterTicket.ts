@@ -3,6 +3,7 @@ export interface EnterTicketParams {
   roomID?: string;
   page?: number;
   limit?: number;
+  date?: string;
 }
 export interface EnterTicket {
   ticketID: string;

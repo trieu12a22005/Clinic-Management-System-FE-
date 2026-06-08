@@ -12,6 +12,7 @@ export type PrescriptionPdfData = {
   diagnose: string;
   note: string;
   medicines: PrescriptionPdfMedicine[];
+  examineDisplayID?: string;
 };
 export type UsageItem = {
   timeToTake?: string;

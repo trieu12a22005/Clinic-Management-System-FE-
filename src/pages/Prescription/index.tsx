@@ -16,6 +16,7 @@ const Prescription: React.FC = () => {
   const [diseaseKeyword, setDiseaseKeyword] = useState('');
   const [diagnosisList, setDiagnosisList] = useState<{ diseaseID: string; diseaseName: string }[]>([]);
   const [isSaved, setIsSaved] = useState(false);
+  const [examineDisplayID, setExamineDisplayID] = useState<string>('');
   const [form] = Form.useForm();
   const { id } = useParams();
   const { ticket } = UseTicketID(id || '');
@@ -152,6 +153,7 @@ const Prescription: React.FC = () => {
       values,
       medicineList,
       diagnoseText: diagnosisList.map((d) => d.diseaseName).join(', '),
+      examineDisplayID,
     });
     await exportPrescriptionPdf(pdfData);
   };
@@ -208,10 +210,14 @@ const Prescription: React.FC = () => {
     console.log('payload before submit:', examineData);
 
     mutate(examineData, {
-      onSuccess: (response) => {
+      onSuccess: (response: any) => {
         console.log('Lưu phiếu khám thành công:', response);
         toast.success('Lưu phiếu khám thành công');
         setIsSaved(true);
+        const newDisplayID = response?.data?.examineDisplayID || response?.examineDisplayID;
+        if (newDisplayID) {
+          setExamineDisplayID(newDisplayID);
+        }
       },
       onError: (error) => {
         console.error('Lỗi:', error);
@@ -244,9 +250,7 @@ const Prescription: React.FC = () => {
         <div className="mt-6 text-center text-2xl font-bold uppercase text-gray-700">
           PHIẾU KHÁM BỆNH
         </div>
-        <Button type="primary" onClick={handleHistory} >
-          Lịch sử khám bệnh
-        </Button>
+
       </div>
       <Form
         form={form}
@@ -263,7 +267,7 @@ const Prescription: React.FC = () => {
               name="name"
               rules={[{ required: true, message: 'Vui lòng nhập họ tên' }]}
             >
-              <Input />
+              <Input disabled />
             </Form.Item>
           </Col>
           <Col span={12}>
@@ -273,7 +277,7 @@ const Prescription: React.FC = () => {
               name="phone"
               rules={[{ required: true, message: 'Vui lòng nhập số điện thoại' }]}
             >
-              <Input />
+              <Input disabled />
             </Form.Item>
           </Col>
         </Row>
@@ -285,7 +289,7 @@ const Prescription: React.FC = () => {
               name="date"
               rules={[{ required: true, message: 'Vui lòng chọn ngày khám' }]}
             >
-              <DatePicker style={{ width: '100%' }} format="DD/MM/YYYY" />
+              <DatePicker style={{ width: '100%' }} format="DD/MM/YYYY" disabled />
             </Form.Item>
           </Col>
           <Col span={12}>
@@ -295,7 +299,7 @@ const Prescription: React.FC = () => {
               name="gender"
               rules={[{ required: true, message: 'Vui lòng chọn giới tính' }]}
             >
-              <Radio.Group>
+              <Radio.Group disabled>
                 <Radio value="Nam">Nam</Radio>
                 <Radio value="Nữ">Nữ</Radio>
               </Radio.Group>
@@ -310,7 +314,7 @@ const Prescription: React.FC = () => {
               name="address"
               rules={[{ required: true, message: 'Vui lòng nhập địa chỉ' }]}
             >
-              <Input />
+              <Input disabled />
             </Form.Item>
           </Col>
           <Col span={6}>

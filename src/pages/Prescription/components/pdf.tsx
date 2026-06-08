@@ -10,6 +10,7 @@ type BuildPdfDataParams = {
   medicineList: PrescriptionMedicine[];
   /** Tên bệnh để in PDF (thay cho mã bệnh gửi backend) */
   diagnoseText?: string;
+  examineDisplayID?: string;
 };
 
 const getMedicineUsageText = (usages: PrescriptionMedicine['usages']) =>
@@ -33,6 +34,7 @@ export const buildPdfData = ({
   values,
   medicineList,
   diagnoseText,
+  examineDisplayID,
 }: BuildPdfDataParams): PrescriptionPdfData => {
   return {
     name: values.name || '',
@@ -51,6 +53,7 @@ export const buildPdfData = ({
       quantity: getMedicineTotalQuantity(item.usages) * Number(item.totalTreatmentDays || 0),
       usage: getMedicineUsageText(item.usages),
     })),
+    examineDisplayID,
   };
 };
 

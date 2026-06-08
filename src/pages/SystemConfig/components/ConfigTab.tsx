@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Table, Input, Button, Modal, Form, Tag, Tooltip, Popconfirm, Spin, Alert, Typography, Space } from "antd";
+import { Table, Input, Button, Modal, Form, Tag, Tooltip, Popconfirm, Spin, Alert, Typography, Space, Badge } from "antd";
 import {
   EditOutlined,
   DeleteOutlined,
@@ -7,18 +7,44 @@ import {
   SearchOutlined,
   ReloadOutlined,
   SaveOutlined,
+  HistoryOutlined,
+  ClockCircleOutlined,
 } from "@ant-design/icons";
 import type { SystemConfigItem } from "@/types/systemConfig";
-import { useSystemConfigData } from "../useSystemconfig";
+import { useSystemConfigData, useConfigPending } from "../useSystemconfig";
+import { ConfigHistoryDrawer } from "./ConfigHistoryDrawer";
 
 const { Text } = Typography;
-// const QUERY_KEY = ['system-config'];
+
+/** Mini badge hiển thị "Ngày áp dụng" — fetch pending riêng từng row */
+const PendingBadge = ({ configKey }: { configKey: string }) => {
+  const { data, isLoading } = useConfigPending(configKey);
+  if (isLoading) return <span className="text-gray-300 text-xs">...</span>;
+  if (!data?.hasPending) return <span className="text-gray-400 text-xs">Hiện tại</span>;
+
+  const effectiveDate = new Date(data.data!.effectiveDate).toLocaleDateString("vi-VN", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
+
+  return (
+    <Tooltip title={`Giá trị mới sẽ có hiệu lực từ ${effectiveDate}`}>
+      <Badge dot color="orange">
+        <Tag icon={<ClockCircleOutlined />} color="warning" className="text-xs cursor-default">
+          {effectiveDate}
+        </Tag>
+      </Badge>
+    </Tooltip>
+  );
+};
 
 export const ConfigTab = () => {
   const [search, setSearch] = useState("");
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [addModalOpen, setAddModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<SystemConfigItem | null>(null);
+  const [historyKey, setHistoryKey] = useState<string | null>(null);
   const [editForm] = Form.useForm();
   const [addForm] = Form.useForm();
 
@@ -28,7 +54,8 @@ export const ConfigTab = () => {
   const configs: SystemConfigItem[] = data?.data ?? [];
   const filtered = configs.filter(
     (c) =>
-      c.key.toLowerCase().includes(search.toLowerCase()) || c.description.toLowerCase().includes(search.toLowerCase())
+      c.key.toLowerCase().includes(search.toLowerCase()) ||
+      (c.description ?? "").toLowerCase().includes(search.toLowerCase())
   );
 
   const openEdit = (item: SystemConfigItem) => {
@@ -62,7 +89,7 @@ export const ConfigTab = () => {
     {
       title: "Khóa cấu hình",
       dataIndex: "key",
-      width: 240,
+      width: 220,
       render: (key: string) => (
         <Tag color="blue" className="font-mono text-xs font-bold">
           {key}
@@ -75,7 +102,7 @@ export const ConfigTab = () => {
       render: (desc: string) => <Text className="text-gray-600">{desc || "—"}</Text>,
     },
     {
-      title: "Giá trị",
+      title: "Giá trị hiện tại",
       dataIndex: "value",
       width: 180,
       render: (value: string) => {
@@ -85,11 +112,26 @@ export const ConfigTab = () => {
       },
     },
     {
+      title: "Ngày áp dụng kế tiếp",
+      width: 180,
+      render: (_: unknown, record: SystemConfigItem) => (
+        <PendingBadge configKey={record.key} />
+      ),
+    },
+    {
       title: "Thao tác",
-      width: 120,
+      width: 140,
       align: "center" as const,
       render: (_: unknown, record: SystemConfigItem) => (
         <Space>
+          <Tooltip title="Xem lịch sử">
+            <Button
+              size="small"
+              icon={<HistoryOutlined />}
+              onClick={() => setHistoryKey(record.key)}
+              className="text-gray-500 border-gray-300 hover:text-indigo-600 hover:border-indigo-400"
+            />
+          </Tooltip>
           <Tooltip title="Chỉnh sửa">
             <Button type="primary" size="small" icon={<EditOutlined />} onClick={() => openEdit(record)} />
           </Tooltip>
@@ -131,6 +173,16 @@ export const ConfigTab = () => {
         </Space>
       </div>
 
+      {/* Info banner về cơ chế ngày mai */}
+      <Alert
+        type="info"
+        showIcon
+        className="mb-4 rounded-xl"
+        message="Lưu ý: Giá trị mới sau khi cập nhật sẽ chỉ có hiệu lực từ ngày hôm sau."
+        description="Hóa đơn và báo cáo hôm nay vẫn sử dụng giá hiện tại. Nhấn biểu tượng đồng hồ để xem lịch sử thay đổi của từng cấu hình."
+        closable
+      />
+
       {isError ? (
         <Alert type="error" message="Không thể tải cấu hình hệ thống" showIcon />
       ) : (
@@ -150,6 +202,10 @@ export const ConfigTab = () => {
         </div>
       )}
 
+      {/* ── Drawer lịch sử ── */}
+      <ConfigHistoryDrawer configKey={historyKey} onClose={() => setHistoryKey(null)} />
+
+      {/* ── Modal chỉnh sửa ── */}
       <Modal
         title={
           <div className="flex items-center gap-2">
@@ -179,9 +235,16 @@ export const ConfigTab = () => {
           </Button>,
         ]}
       >
-        <Form form={editForm} layout="vertical" className="mt-4">
-          <Form.Item label="Giá trị" name="value" rules={[{ required: true, message: "Vui lòng nhập giá trị" }]}>
-            <Input autoFocus />
+        <Alert
+          type="warning"
+          showIcon
+          className="mb-4 rounded-lg"
+          message="Giá trị mới sẽ có hiệu lực từ ngày mai"
+          description="Hóa đơn và báo cáo hôm nay không bị ảnh hưởng."
+        />
+        <Form form={editForm} layout="vertical" className="mt-2">
+          <Form.Item label="Giá trị mới" name="value" rules={[{ required: true, message: "Vui lòng nhập giá trị" }]}>
+            <Input autoFocus placeholder={editingItem?.value} />
           </Form.Item>
           <Form.Item label="Mô tả" name="description">
             <Input.TextArea rows={2} placeholder="Mô tả cấu hình (tuỳ chọn)" />
@@ -189,6 +252,7 @@ export const ConfigTab = () => {
         </Form>
       </Modal>
 
+      {/* ── Modal thêm mới ── */}
       <Modal
         title={
           <div className="flex items-center gap-2">

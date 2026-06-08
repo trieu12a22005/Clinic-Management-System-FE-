@@ -17,8 +17,10 @@ export const useSystemConfigData = () => {
     mutationFn: ({ key, value, description }: { key: string; value: string; description?: string }) =>
       systemConfigApi.update(key, { value, description }),
     onSuccess: () => {
-      toast.success('Cập nhật cấu hình thành công!');
+      toast.success('Cập nhật cấu hình thành công! Giá mới sẽ áp dụng từ ngày mai.');
       queryClient.invalidateQueries({ queryKey: QUERY_KEY });
+      // Invalidate tất cả pending/history queries
+      queryClient.invalidateQueries({ queryKey: ['system-config-pending'] });
     },
     onError: () => toast.error('Cập nhật thất bại. Vui lòng thử lại.'),
   });
@@ -37,6 +39,7 @@ export const useSystemConfigData = () => {
     onSuccess: () => {
       toast.success('Đã xoá cấu hình!');
       queryClient.invalidateQueries({ queryKey: QUERY_KEY });
+      queryClient.invalidateQueries({ queryKey: ['system-config-pending'] });
     },
     onError: () => toast.error('Xoá thất bại.'),
   });
@@ -48,6 +51,26 @@ export const useSystemConfigData = () => {
     deleteMutation,
   };
 };
+
+/** Hook lấy lịch sử thay đổi của 1 config key (lazy — chỉ fetch khi enabled=true) */
+export const useConfigHistory = (key: string | null) => {
+  return useQuery({
+    queryKey: ['system-config-history', key],
+    queryFn: () => systemConfigApi.getHistory(key!, 30),
+    enabled: !!key,
+    staleTime: 0, // luôn fetch mới khi mở drawer
+  });
+};
+
+/** Hook kiểm tra pending change (ngày mai) của 1 config key */
+export const useConfigPending = (key: string) => {
+  return useQuery({
+    queryKey: ['system-config-pending', key],
+    queryFn: () => systemConfigApi.getPending(key),
+    staleTime: 30_000, // cache 30s
+  });
+};
+
 
 export const useMedicineUnitData = () => {
   const queryClient = useQueryClient();
