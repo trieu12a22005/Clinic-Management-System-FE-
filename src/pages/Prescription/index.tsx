@@ -241,9 +241,6 @@ const Prescription: React.FC = () => {
       },
     });
   };
-  const handleHistory = () => {
-    naviagate(`/patient-history/${ticket?.patientID}`);
-  }
   return (
     <div className="px-8 pb-8 mr-[6%]">
       <div>
